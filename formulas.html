@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#0a0a0c] text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumScale // Fórmulas & Polinomios</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- MathJax para renderizado matemático -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="font-sans antialiased overflow-x-hidden min-h-screen flex flex-col justify-between">
+
+    <!-- Fondos de Neón -->
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[130px] animate-blob-slow"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-pink-600/10 blur-[150px] animate-blob-alternate"></div>
+    </div>
+
+    <!-- Header Sincronizado -->
+    <header class="w-full max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row gap-4 justify-between items-center border-b border-white/5 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
+                <div class="w-full h-full bg-[#0d0d11] rounded-[11px] flex items-center justify-center">
+                    <i data-lucide="cpu" class="w-5 h-5 text-indigo-400"></i>
+                </div>
+            </div>
+            <div>
+                <span class="font-mono text-xs uppercase tracking-widest text-indigo-400">Resolución Avanzada</span>
+                <h1 class="text-lg font-semibold tracking-tight leading-none">QuantumScale Solver</h1>
+            </div>
+        </div>
+        <!-- Navegación Unificada -->
+        <div class="flex items-center gap-2 bg-white/[0.02] p-1 rounded-xl border border-white/5">
+            <a href="index.html" class="text-xs font-medium px-4 py-2 rounded-lg transition-all text-slate-400 hover:text-slate-100">
+                Conversor
+            </a>
+            <a href="galea.html" class="text-xs font-medium px-4 py-2 rounded-lg transition-all text-slate-400 hover:text-slate-100">
+                Método de Galera & LaTeX
+            </a>
+            <a href="formulas.html" class="text-xs font-medium px-4 py-2 rounded-lg transition-all bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                Fórmulas & Polinomios
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
+        
+        <!-- Pestañas de Navegación del Solver -->
+        <div class="flex justify-center">
+            <div class="bg-white/[0.03] p-1 rounded-2xl border border-white/5 inline-flex">
+                <button id="tab-physics" class="px-5 py-2 rounded-xl text-xs font-medium transition-all bg-white/5 text-slate-100">
+                    Fórmulas de Física (Ej: F = m·d/t²)
+                </button>
+                <button id="tab-poly" class="px-5 py-2 rounded-xl text-xs font-medium transition-all text-slate-400 hover:text-slate-100">
+                    Polinomios de Unidades
+                </button>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 1: RESOLVER FÓRMULA DE FÍSICA -->
+        <div id="panel-physics" class="bg-white/[0.02] border border-white/[0.08] backdrop-blur-2xl rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+            <div class="flex items-center gap-3 border-b border-white/5 pb-4">
+                <i data-lucide="activity" class="text-indigo-400"></i>
+                <h2 class="text-sm font-semibold font-mono uppercase tracking-wider text-slate-200">Normalizador de Fórmulas</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-4 md:col-span-1">
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-2">Ecuación Física</label>
+                        <select id="physics-equation" class="w-full bg-[#121217] border border-white/10 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-indigo-500">
+                            <option value="force_dist_time">Fuerza: F = (m · d) / t²</option>
+                            <option value="f_ma">Fuerza Clásica: F = m · a</option>
+                            <option value="energy_mc2">E = m · c²</option>
+                        </select>
+                    </div>
+                    <div id="equation-variables" class="space-y-3"></div>
+                    <button id="btn-solve-physics" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-semibold transition-all">
+                        Normalizar y Resolver
+                    </button>
+                </div>
+                <div class="md:col-span-2 bg-[#121217]/50 border border-white/5 rounded-2xl p-6 flex flex-col justify-between min-h-[300px]">
+                    <span class="text-[10px] font-mono text-slate-500 uppercase tracking-wide">Resolución de Magnitudes en el S.I.</span>
+                    <div id="physics-output-latex" class="py-6 overflow-x-auto text-center">
+                        $$ Esperando datos... $$
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: POLINOMIO DE UNIDADES -->
+        <div id="panel-poly" class="hidden bg-white/[0.02] border border-white/[0.08] backdrop-blur-2xl rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+            <div class="flex items-center gap-3 border-b border-white/5 pb-4">
+                <i data-lucide="layers" class="text-pink-400"></i>
+                <h2 class="text-sm font-semibold font-mono uppercase tracking-wider text-slate-200">Operaciones Combinadas</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-xs font-mono text-slate-500 uppercase">Términos del Polinomio (Suma/Resta de Longitudes)</h3>
+                    <div class="grid grid-cols-3 gap-2 items-center">
+                        <input type="number" id="poly-a-val" value="4.5" class="bg-[#121217] border border-white/10 rounded-lg px-2.5 py-2 text-xs focus:outline-none">
+                        <select id="poly-a-unit" class="bg-[#121217] border border-white/10 rounded-lg px-2 py-2 text-xs focus:outline-none">
+                            <option value="dm">dm</option>
+                            <option value="m" selected>m</option>
+                            <option value="dam">dam</option>
+                            <option value="Hm">Hm</option>
+                        </select>
+                        <span class="text-xs font-mono text-slate-500 text-center">(Término A)</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 items-center">
+                        <input type="number" id="poly-b-val" value="940" class="bg-[#121217] border border-white/10 rounded-lg px-2.5 py-2 text-xs focus:outline-none">
+                        <select id="poly-b-unit" class="bg-[#121217] border border-white/10 rounded-lg px-2 py-2 text-xs focus:outline-none">
+                            <option value="mm">mm</option>
+                            <option value="cm">cm</option>
+                            <option value="m" selected>m</option>
+                        </select>
+                        <span class="text-xs font-mono text-slate-500 text-center">+ (Término B)</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 items-center">
+                        <input type="number" id="poly-c-val" value="400" class="bg-[#121217] border border-white/10 rounded-lg px-2.5 py-2 text-xs focus:outline-none">
+                        <select id="poly-c-unit" class="bg-[#121217] border border-white/10 rounded-lg px-2 py-2 text-xs focus:outline-none">
+                            <option value="m" selected>m</option>
+                        </select>
+                        <span class="text-xs font-mono text-slate-500 text-center">- (Término C)</span>
+                    </div>
+                    <div class="h-px bg-white/5"></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-mono text-slate-500 mb-1.5">Término D (Multiplicador)</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="poly-d-val" value="59.8" class="bg-[#121217] border border-white/10 rounded-lg px-2.5 py-2 text-xs focus:outline-none w-1/2">
+                                <select id="poly-d-unit" class="bg-[#121217] border border-white/10 rounded-lg px-2 py-2 text-xs focus:outline-none w-1/2">
+                                    <option value="m" selected>m</option>
+                                    <option value="cm">cm</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-mono text-slate-500 mb-1.5">Unidad de Destino</label>
+                            <select id="poly-target" class="w-full bg-[#121217] border border-white/10 rounded-lg px-2 py-2 text-xs focus:outline-none">
+                                <option value="ft^2">ft² (Pies²)</option>
+                                <option value="m^2">m² (Metros²)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="btn-solve-poly" class="w-full py-3 bg-pink-600 hover:bg-pink-500 rounded-xl text-xs font-semibold transition-all">
+                        Resolver Polinomio de Área
+                    </button>
+                </div>
+                <div class="bg-[#121217]/50 border border-white/5 rounded-2xl p-6 flex flex-col justify-between">
+                    <span class="text-[10px] font-mono text-slate-500 uppercase tracking-wide">Desglose Paso a Paso</span>
+                    <div id="poly-output-latex" class="py-6 overflow-x-auto text-center">
+                        $$ Esperando ejecución... $$
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-6 border-t border-white/5 text-xs text-slate-500 font-mono">
+        QuantumScale Solver • Inteligencia Metrológica Avanzada
+    </footer>
+
+    <script src="conversions.js" type="module"></script>
+    <script src="formulas.js" type="module"></script>
+</body>
+</html>

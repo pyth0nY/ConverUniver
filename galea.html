@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#0a0a0c] text-slate-100">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumScale // Método de Galera & LaTeX</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Configuración e inclusión de MathJax para renderizado LaTeX -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        .cancel-line {
+            position: relative;
+            display: inline-block;
+        }
+
+        .cancel-line::after {
+            content: '';
+            position: absolute;
+            left: -2px;
+            right: -2px;
+            top: 50%;
+            height: 2px;
+            background: #ef4444;
+            /* red-500 */
+            transform: rotate(-15deg);
+            animation: slash-draw 0.4s ease-out forwards;
+            transform-origin: left;
+        }
+
+        @keyframes slash-draw {
+            from {
+                transform: scaleX(0) rotate(-15deg);
+            }
+
+            to {
+                transform: scaleX(1) rotate(-15deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased overflow-x-hidden min-h-screen flex flex-col justify-between">
+
+    <!-- Fondos de Neón -->
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div
+            class="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[130px] animate-blob-slow">
+        </div>
+        <div
+            class="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[150px] animate-blob-alternate">
+        </div>
+    </div>
+
+    <!-- Header Sincronizado -->
+    <header
+        class="w-full max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row gap-4 justify-between items-center border-b border-white/5 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
+                <div class="w-full h-full bg-[#0d0d11] rounded-[11px] flex items-center justify-center">
+                    <i data-lucide="scale" class="w-5 h-5 text-indigo-400"></i>
+                </div>
+            </div>
+            <div>
+                <span class="font-mono text-xs uppercase tracking-widest text-indigo-400">Factor de Conversión</span>
+                <h1 class="text-lg font-semibold tracking-tight leading-none">QuantumScale Pro</h1>
+            </div>
+        </div>
+        <!-- Navegación Unificada -->
+        <div class="flex items-center gap-2 bg-white/[0.02] p-1 rounded-xl border border-white/5">
+            <a href="index.html"
+                class="text-xs font-medium px-4 py-2 rounded-lg transition-all text-slate-400 hover:text-slate-100">
+                Conversor
+            </a>
+            <a href="galea.html"
+                class="text-xs font-medium px-4 py-2 rounded-lg transition-all bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                Método de Galera & LaTeX
+            </a>
+            <a href="formulas.html"
+                class="text-xs font-medium px-4 py-2 rounded-lg transition-all text-slate-400 hover:text-slate-100">
+                Fórmulas & Polinomios
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-5xl mx-auto px-4 py-10 space-y-8">
+
+        <!-- Pestañas de Modo -->
+        <div class="flex justify-center">
+            <div class="bg-white/[0.03] p-1 rounded-2xl border border-white/5 inline-flex">
+                <button id="tab-auto"
+                    class="px-6 py-2.5 rounded-xl text-xs font-medium transition-all duration-300 bg-white/5 text-slate-100">
+                    Modo Automático
+                </button>
+                <button id="tab-free"
+                    class="px-6 py-2.5 rounded-xl text-xs font-medium transition-all duration-300 text-slate-400 hover:text-slate-100">
+                    Creador Libre (Ultra-Complejo)
+                </button>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 1: MODO AUTOMÁTICO -->
+        <div id="panel-auto"
+            class="bg-white/[0.02] border border-white/[0.08] backdrop-blur-2xl rounded-3xl p-6 md:p-8 shadow-2xl relative space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-2 uppercase">Valor Inicial</label>
+                    <input type="number" id="galea-val" value="25.4"
+                        class="w-full bg-[#121217] border border-white/10 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-2 uppercase">Categoría</label>
+                    <select id="galea-cat"
+                        class="w-full bg-[#121217] border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none">
+                        <option value="length">Distancia (m, in, ft)</option>
+                        <option value="area">Área (m², in², ft²)</option>
+                        <option value="volume">Volumen (m³, L, gal, ft³)</option>
+                        <option value="energy">Energía (J, BTU, eV, TeV)</option>
+                        <option value="time">Tiempo (s, min, h, años)</option>
+                        <option value="mass">Masa (g, kg, lb)</option>
+                        <option value="pressure">Presión (Pa, kPa, Torr, psi)</option>
+                        <option value="data">Datos (bit, B, Tib, Ebit)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-2 uppercase">De (Origen)</label>
+                    <select id="galea-from"
+                        class="w-full bg-[#121217] border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-2 uppercase">A (Destino)</label>
+                    <select id="galea-to"
+                        class="w-full bg-[#121217] border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none"></select>
+                </div>
+            </div>
+            <div class="flex justify-center">
+                <button id="btn-generate-galea"
+                    class="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-semibold transition-all cursor-pointer">
+                    Construir Galera
+                </button>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: MODO CREADOR LIBRE -->
+        <div id="panel-free"
+            class="hidden bg-white/[0.02] border border-white/[0.08] backdrop-blur-2xl rounded-3xl p-6 md:p-8 shadow-2xl relative space-y-6">
+            <h3 class="text-xs font-semibold text-indigo-400 font-mono uppercase tracking-wide">Constructor Libre
+                Multivariable (Estilo Ejercicio 35)</h3>
+            <div class="space-y-4">
+                <!-- Entrada Inicial -->
+                <div class="flex flex-wrap items-center gap-4 bg-white/[0.03] p-4 rounded-xl border border-white/5">
+                    <span class="text-xs font-mono text-slate-400 uppercase">Magnitud Inicial:</span>
+                    <input type="number" id="free-init-val" value="15.5"
+                        class="bg-[#121217] border border-white/10 rounded-lg px-3 py-1.5 w-32 focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="free-init-unit" value="J/s"
+                        class="bg-[#121217] border border-white/10 rounded-lg px-3 py-1.5 w-32 focus:outline-none focus:border-indigo-500">
+                </div>
+                <!-- Factores Dinámicos -->
+                <div id="factors-container" class="space-y-3"></div>
+                <div class="flex gap-2">
+                    <button id="btn-add-factor"
+                        class="px-4 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-semibold rounded-lg transition-all flex items-center gap-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Añadir Factor
+                    </button>
+                    <button id="btn-calculate-free"
+                        class="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-xs font-semibold rounded-lg transition-all">
+                        Calcular Cadena Libre
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLAYGROUND DE RESULTADOS -->
+        <div id="galea-playground"
+            class="hidden bg-white/[0.01] border border-white/5 rounded-3xl p-6 md:p-8 space-y-8">
+            <h3 class="text-xs font-mono text-indigo-400 uppercase tracking-widest text-center">Visualización del
+                Análisis Dimensional</h3>
+            <div class="overflow-x-auto py-4 flex justify-center">
+                <div id="galea-grid-container" class="inline-flex flex-col items-center font-mono text-sm"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
+                <div class="bg-white/[0.02] border border-white/5 p-5 rounded-2xl space-y-4">
+                    <h4 class="text-xs font-semibold text-slate-300">Simplificación Algebraica</h4>
+                    <div id="math-steps" class="font-mono text-xs text-slate-400 space-y-2"></div>
+                </div>
+                <div
+                    class="bg-gradient-to-br from-indigo-500/[0.03] to-purple-500/[0.03] border border-white/5 p-5 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <h4 class="text-xs font-semibold text-indigo-300">Resultado Final</h4>
+                        <p class="text-[10px] text-slate-500 font-mono mt-1">Convertido en Notación Científica Estándar
+                        </p>
+                    </div>
+                    <div id="galea-final-result" class="text-3xl font-light text-slate-100 font-mono mt-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN DE LATEX PERMANENTE (SIEMPRE VISIBLE) -->
+        <div
+            class="bg-white/[0.02] border border-white/[0.08] backdrop-blur-2xl rounded-3xl p-6 md:p-8 shadow-2xl space-y-4">
+            <div class="flex items-center gap-2">
+                <i data-lucide="file-code" class="text-purple-400"></i>
+                <h3 class="text-sm font-semibold text-slate-200">Editor e Intérprete LaTeX de tu Ejercicio</h3>
+            </div>
+            <p class="text-xs text-slate-400 font-light">
+                Puedes escribir o modificar el código LaTeX directamente aquí abajo. Se renderizará en tiempo real
+                utilizando MathJax, ideal para transcribir tus ejercicios de física con formato académico.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[11px] font-mono text-slate-500 mb-2 uppercase">Código LaTeX</label>
+                    <textarea id="latex-input" rows="4"
+                        class="w-full bg-[#121217] border border-white/10 rounded-xl p-4 font-mono text-xs text-slate-300 focus:outline-none focus:border-purple-500"
+                        placeholder="Escribe aquí tu código LaTeX..."></textarea>
+                    <button id="btn-copy-latex"
+                        class="mt-2 px-3 py-1.5 bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5">
+                        <i data-lucide="clipboard" class="w-3.5 h-3.5"></i> Copiar LaTeX al Portapapeles
+                    </button>
+                </div>
+                <div
+                    class="bg-[#121217]/50 border border-white/5 rounded-xl p-4 flex flex-col justify-between min-h-[140px]">
+                    <span class="text-[11px] font-mono text-slate-500 uppercase">Vista de Fórmula Renderizada
+                        (MathJax)</span>
+                    <div id="latex-output" class="text-center py-4 text-sm overflow-x-auto">
+                        <!-- Renderizado inicial preestablecido -->
+                        $$E = 15.5 \text{ J/s} \cdot (3.1536 \times 10^{8} \text{ s}) = 4.89 \times 10^{9} \text{ J}$$
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-6 border-t border-white/5 text-xs text-slate-500 font-mono">
+        QuantumScale Pro • Análisis Dimensional Infinito
+    </footer>
+
+    <script src="conversions.js" type="module"></script>
+    <script src="galea.js" type="module"></script>
+</body>
+
+</html>

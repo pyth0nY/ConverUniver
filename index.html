@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#0a0a0c] text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumScale // Conversor Universal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="font-sans antialiased overflow-x-hidden min-h-screen flex flex-col justify-between">
+
+    <!-- Fondos Épicos -->
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[120px] animate-blob-slow"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-violet-600/10 blur-[150px] animate-blob-alternate"></div>
+        <div class="absolute top-[40%] left-[35%] w-[300px] h-[300px] rounded-full bg-cyan-500/5 blur-[100px] animate-pulse"></div>
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#1f29370a_1px,transparent_1px),linear-gradient(to_bottom,#1f29370a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+    </div>
+
+    <!-- Header Sincronizado -->
+    <header class="w-full max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row gap-4 justify-between items-center border-b border-white/5 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
+                <div class="w-full h-full bg-[#0d0d11] rounded-[11px] flex items-center justify-center">
+                    <i data-lucide="scale" class="w-5 h-5 text-indigo-400"></i>
+                </div>
+            </div>
+            <div>
+                <span class="font-mono text-xs uppercase tracking-widest text-indigo-400">Escala de Magnitud</span>
+                <h1 class="text-lg font-semibold tracking-tight leading-none">QuantumScale Pro</h1>
+            </div>
+        </div>
+        <!-- Navegación Unificada -->
+        <div class="flex items-center gap-2 bg-white/[0.02] p-1 rounded-xl border border-white/5">
+            <a href="index.html" class="text-xs font-medium px-4 py-2 rounded-lg transition-all bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                Conversor
+            </a>
+            <a href="galea.html" class="text-xs font-medium px-4 py-2 rounded-lg transition-all text-slate-400 hover:text-slate-100">
+                Método de Galera & LaTeX
+            </a>
+            <a href="formulas.html" class="text-xs font-medium px-4 py-2 rounded-lg transition-all text-slate-400 hover:text-slate-100">
+                Fórmulas & Polinomios
+            </a>
+        </div>
+    </header>
+
+    <!-- Main App Container -->
+    <main class="flex-grow flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-2xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-2xl rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+            
+            <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+
+            <!-- Selectores de Categoría -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-8 bg-white/[0.03] p-1.5 rounded-2xl border border-white/5">
+                <button data-category="length" class="category-btn active-tab flex flex-col items-center gap-2 py-3 rounded-xl transition-all duration-300">
+                    <i data-lucide="ruler" class="w-5 h-5"></i>
+                    <span class="text-xs font-medium">Distancia</span>
+                </button>
+                <button data-category="mass" class="category-btn flex flex-col items-center gap-2 py-3 rounded-xl transition-all duration-300">
+                    <i data-lucide="dumbbell" class="w-5 h-5 text-slate-400"></i>
+                    <span class="text-xs font-medium text-slate-400">Masa</span>
+                </button>
+                <button data-category="energy" class="category-btn flex flex-col items-center gap-2 py-3 rounded-xl transition-all duration-300">
+                    <i data-lucide="zap" class="w-5 h-5 text-slate-400"></i>
+                    <span class="text-xs font-medium text-slate-400">Energía</span>
+                </button>
+                <button data-category="data" class="category-btn flex flex-col items-center gap-2 py-3 rounded-xl transition-all duration-300">
+                    <i data-lucide="database" class="w-5 h-5 text-slate-400"></i>
+                    <span class="text-xs font-medium text-slate-400">Datos</span>
+                </button>
+            </div>
+
+            <!-- Interfaz del Conversor -->
+            <div class="space-y-6">
+                
+                <!-- Input Card -->
+                <div class="bg-white/[0.03] border border-white/5 p-5 rounded-2xl relative transition-all duration-300 focus-within:border-indigo-500/50">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="text-xs font-mono text-slate-400 uppercase tracking-wider">Entrada (Desde)</label>
+                        <select id="prefix-from" class="bg-[#121217] text-sm text-slate-200 border border-white/10 rounded-lg px-2.5 py-1 focus:outline-none"></select>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <input type="number" id="val-input" value="1" placeholder="0.00" class="bg-transparent text-3xl font-light w-full focus:outline-none">
+                        <span id="unit-symbol-from" class="text-lg font-mono text-indigo-400 font-semibold min-w-[45px] text-right">nm</span>
+                    </div>
+                </div>
+
+                <!-- Swap Button -->
+                <div class="flex justify-center -my-3 relative z-10">
+                    <button id="btn-swap" class="w-10 h-10 rounded-full bg-[#121217] border border-white/10 flex items-center justify-center hover:border-indigo-500 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer shadow-lg group">
+                        <i data-lucide="arrow-up-down" class="w-4 h-4 text-slate-400 group-hover:text-indigo-400"></i>
+                    </button>
+                </div>
+
+                <!-- Output Card -->
+                <div class="bg-gradient-to-br from-indigo-500/[0.03] to-purple-500/[0.03] border border-white/5 p-5 rounded-2xl relative">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="text-xs font-mono text-indigo-300/80 uppercase tracking-wider">Resultado (Hacia)</label>
+                        <select id="prefix-to" class="bg-[#121217] text-sm text-slate-200 border border-white/10 rounded-lg px-2.5 py-1 focus:outline-none"></select>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div id="val-output" class="text-3xl font-light text-slate-100 truncate w-full">1.00000</div>
+                        <span id="unit-symbol-to" class="text-lg font-mono text-purple-400 font-semibold min-w-[45px] text-right">Pm</span>
+                    </div>
+
+                    <!-- Módulo Flotante: Notación Científica -->
+                    <div class="mt-4 pt-3 border-t border-white/5 flex justify-between items-center text-xs">
+                        <span class="text-slate-400 font-mono">Notación Científica:</span>
+                        <span id="scientific-output" class="font-mono bg-indigo-500/10 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/20 font-semibold"></span>
+                    </div>
+                </div>
+
+                <!-- Contexto Cósmico -->
+                <div id="comparison-card" class="bg-white/[0.01] border border-white/[0.03] p-4 rounded-xl flex items-start gap-4">
+                    <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 mt-0.5">
+                        <i data-lucide="info" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-semibold text-slate-300 mb-1">Comparación Física</h4>
+                        <p id="comparison-text" class="text-xs text-slate-400 leading-relaxed font-light">
+                            Selecciona valores para entender la dimensión real de tu conversión.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-6 border-t border-white/5 text-xs text-slate-500 font-mono">
+        QuantumScale Pro • Hecho con fines de escala espacial
+    </footer>
+
+    <script src="conversions.js" type="module"></script>
+    <script src="app.js" type="module"></script>
+</body>
+</html>

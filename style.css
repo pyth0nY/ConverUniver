@@ -1,0 +1,100 @@
+/* Base */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #08080a;
+}
+
+/* Tipografía de código y etiquetas */
+.font-mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Animación de los Blobs de fondo */
+@keyframes blob-slow {
+
+    0%,
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
+
+    50% {
+        transform: translate(50px, -40px) scale(1.15);
+    }
+}
+
+@keyframes blob-alternate {
+
+    0%,
+    100% {
+        transform: translate(0px, 0px) scale(1.1);
+    }
+
+    50% {
+        transform: translate(-60px, 50px) scale(0.95);
+    }
+}
+
+.animate-blob-slow {
+    animation: blob-slow 20s infinite ease-in-out;
+}
+
+.animate-blob-alternate {
+    animation: blob-alternate 25s infinite ease-in-out;
+}
+
+/* Custom Scrollbars */
+select::-webkit-scrollbar {
+    width: 6px;
+}
+
+select::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+select::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+}
+
+/* Botón de Categorías con efecto Framer */
+.category-btn {
+    position: relative;
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+.category-btn.active-tab {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.category-btn.active-tab i {
+    color: #818cf8;
+    /* indigo-400 */
+    filter: drop-shadow(0 0 8px rgba(129, 140, 248, 0.4));
+}
+
+.category-btn.active-tab span {
+    color: #f1f5f9;
+    /* slate-100 */
+}
+
+/* Animación de cambio de valor */
+.value-updated {
+    animation: flash-neon 0.4s ease-out;
+}
+
+@keyframes flash-neon {
+    0% {
+        opacity: 0.5;
+        transform: scale(0.99);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

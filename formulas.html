@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" class="h-full">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +9,12 @@
     <link class="tab-icon" rel="icon" type="image/png" href="logo.png">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
-    
+
     <!-- MathJax -->
     <script>
         window.MathJax = {
@@ -24,43 +27,56 @@
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
+
 <body class="antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500/30 selection:text-white">
-       <!-- VIDEO DE FONDO PERMANENTE Y CAPA DE CONTRASTE -->
+    <!-- VIDEO DE FONDO PERMANENTE Y CAPA DE CONTRASTE -->
     <video autoplay loop muted playsinline class="video-background">
         <!-- Buscará primero tu archivo de video local en tu proyecto -->
         <source src="video.mp4" type="video/mp4">
     </video>
     <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-500/5 blur-[140px] animate-blob-slow"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-pink-600/5 blur-[160px] animate-blob-alternate"></div>
+        <div
+            class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-500/5 blur-[140px] animate-blob-slow">
+        </div>
+        <div
+            class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-pink-600/5 blur-[160px] animate-blob-alternate">
+        </div>
     </div>
 
     <!-- Header Sincronizado con el Logo Limpio -->
-    <header class="w-full max-w-5xl mx-auto px-6 py-6 flex flex-col md:flex-row gap-4 justify-between items-center border-b border-white/5 backdrop-blur-md">
+    <header
+        class="w-full max-w-5xl mx-auto px-6 py-6 flex flex-col md:flex-row gap-4 justify-between items-center border-b border-white/5 backdrop-blur-md">
         <div class="flex items-center gap-3">
-            <img src="logo.png" alt="Conversor Universal" class="h-10 w-auto object-contain spring-transition hover:opacity-80">
+            <img src="logo.png" alt="Conversor Universal"
+                class="h-10 w-auto object-contain spring-transition hover:opacity-80">
             <div>
                 <span class="font-mono text-[9px] uppercase tracking-widest text-zinc-500">Módulo de Fórmulas</span>
                 <h1 class="text-sm font-semibold tracking-tight text-zinc-100">Conversor Universal</h1>
             </div>
         </div>
         <!-- Menú Unificado -->
-       <!-- Menú Unificado Sincronizado -->
+        <!-- Menú Unificado Sincronizado -->
         <!-- Menú de 5 Pestañas Sincronizado -->
-        <nav class="flex flex-wrap items-center justify-center gap-1.5 bg-zinc-950/80 p-1 rounded-xl border border-white/5 shadow-inner">
-            <a href="index.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+        <nav
+            class="flex flex-wrap items-center justify-center gap-1.5 bg-zinc-950/80 p-1 rounded-xl border border-white/5 shadow-inner">
+            <a href="index.html"
+                class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
                 Conversor
             </a>
-            <a href="galea.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+            <a href="galea.html"
+                class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
                 Método de Galera
             </a>
-            <a href="formulas.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+            <a href="formulas.html"
+                class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
                 Fórmulas
             </a>
-            <a href="geograficos.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+            <a href="geograficos.html"
+                class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
                 Geográficos
             </a>
-            <a href="develops.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+            <a href="develops.html"
+                class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
                 Develops
             </a>
         </nav>
@@ -68,14 +84,16 @@
 
     <!-- Main Content -->
     <main class="flex-grow w-full max-w-4xl mx-auto px-4 py-8 space-y-6">
-        
+
         <!-- Pestañas de Navegación del Solver -->
         <div class="flex justify-center">
             <div class="bg-zinc-950/60 p-1 rounded-xl border border-white/5 inline-flex gap-1">
-                <button id="tab-physics" class="px-5 py-2 rounded-lg text-xs font-medium transition-all bg-white/5 text-zinc-100">
+                <button id="tab-physics"
+                    class="px-5 py-2 rounded-lg text-xs font-medium transition-all bg-white/5 text-zinc-100">
                     Fórmulas de Física
                 </button>
-                <button id="tab-poly" class="px-5 py-2 rounded-lg text-xs font-medium transition-all text-zinc-500 hover:text-zinc-100">
+                <button id="tab-poly"
+                    class="px-5 py-2 rounded-lg text-xs font-medium transition-all text-zinc-500 hover:text-zinc-100">
                     Polinomios de Unidades
                 </button>
             </div>
@@ -85,25 +103,77 @@
         <div id="panel-physics" class="glass-card rounded-2xl p-6 md:p-8 shadow-2xl space-y-6 animate-fade-in">
             <div class="flex items-center gap-3 border-b border-white/5 pb-4">
                 <i data-lucide="activity" class="text-indigo-400 w-4 h-4"></i>
-                <h2 class="text-xs font-semibold font-mono uppercase tracking-wider text-zinc-200">Normalizador de Fórmulas</h2>
+                <h2 class="text-xs font-semibold font-mono uppercase tracking-wider text-zinc-200">Normalizador de
+                    Fórmulas</h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="space-y-4 md:col-span-1">
                     <div>
                         <label class="block text-[10px] font-mono text-zinc-400 mb-2">Ecuación Física</label>
-                        <select id="physics-equation" class="w-full bg-zinc-900 border border-white/10 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-zinc-700 text-zinc-100">
-                            <option value="force_dist_time">Fuerza: F = (m · d) / t²</option>
-                            <option value="f_ma">Fuerza Clásica: F = m · a</option>
-                            <option value="energy_mc2">E = m · c²</option>
+
+                        <select id="physics-equation"
+                            class="w-full bg-zinc-900 border border-white/10 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-zinc-700 text-zinc-100 font-sans">
+
+                            <!-- Grupo 1: Cinemática y Dinámica -->
+                            <optgroup label="Cinemática y Dinámica">
+                                <option value="f_ma" selected>Segunda Ley de Newton: F = m · a</option>
+                                <option value="vel_avg">Velocidad Media: v = d / t</option>
+                                <option value="acc_linear">Aceleración Lineal: a = (v_f - v_i) / t</option>
+                                <option value="momentum_linear">Cantidad de Movimiento: p = m · v</option>
+                                <option value="torque_mechanical">Momento de Torsión (Torque): τ = F · r</option>
+                                <option value="angular_velocity">Velocidad Angular: ω = θ / t</option>
+                                <option value="centripetal_acceleration">Aceleración Centrípeta: ac = v² / r</option>
+                                <option value="centripetal_force">Fuerza Centrípeta: Fc = m · v² / r</option>
+                                <option value="force_dist_time">Fuerza Compuesta: F = (m · d) / t²</option>
+                            </optgroup>
+
+                            <!-- Grupo 2: Fuerza, Trabajo y Energía -->
+                            <optgroup label="Fuerza, Trabajo y Energía">
+                                <option value="energy_mc2">Relatividad de Einstein: E = m · c²</option>
+                                <option value="energy_kinetic">Energía Cinética: Ec = ½ · m · v²</option>
+                                <option value="energy_potential">Energía Potencial Gravitatoria: Ep = m · g · h</option>
+                                <option value="work_mechanical">Trabajo Mecánico: W = F · d</option>
+                                <option value="power_mechanical">Potencia Mecánica: P = W / t</option>
+                                <option value="hooke_law">Ley de Hooke (Fuerza Elástica): F = k · x</option>
+                                <option value="gravitation_universal">Fuerza Gravitacional: F = G · m₁ · m₂ / r²
+                                </option>
+                                <option value="pendulum_period">Periodo de un Péndulo: T = 2 · π · √(L / g)</option>
+                            </optgroup>
+
+                            <!-- Grupo 3: Electricidad y Magnetismo -->
+                            <optgroup label="Electricidad y Magnetismo">
+                                <option value="ohm_law">Ley de Ohm (Voltaje): V = I · R</option>
+                                <option value="power_electrical">Potencia Eléctrica: P = V · I</option>
+                                <option value="coulomb_law">Ley de Coulomb (Fuerza Eléctrica): F = K · q₁ · q₂ / r²
+                                </option>
+                            </optgroup>
+
+                            <!-- Grupo 4: Fluidos y Termodinámica -->
+                            <optgroup label="Fluidos y Termodinámica">
+                                <option value="pressure_basic">Presión Básica: P = F / A</option>
+                                <option value="pressure_hydrostatic">Presión Hidrostática: P = ρ · g · h</option>
+                                <option value="density_basic">Densidad de un Cuerpo: ρ = m / V</option>
+                                <option value="sensible_heat">Calor Sensible: Q = m · Ce · ΔT</option>
+                            </optgroup>
+
+                            <!-- Grupo 5: Ondas y Oscilaciones -->
+                            <optgroup label="Ondas y Oscilaciones">
+                                <option value="wave_frequency">Frecuencia de Onda: f = v / λ</option>
+                                <option value="angular_frequency">Frecuencia Angular: ω = 2 · π · f</option>
+                            </optgroup>
+
                         </select>
                     </div>
                     <div id="equation-variables" class="space-y-3"></div>
-                    <button id="btn-solve-physics" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-all">
+                    <button id="btn-solve-physics"
+                        class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-all">
                         Normalizar y Resolver
                     </button>
                 </div>
-                <div class="md:col-span-2 bg-zinc-950/40 border border-white/5 rounded-xl p-6 flex flex-col justify-between min-h-[250px]">
-                    <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wide">Resolución de Magnitudes S.I.</span>
+                <div
+                    class="md:col-span-2 bg-zinc-950/40 border border-white/5 rounded-xl p-6 flex flex-col justify-between min-h-[250px]">
+                    <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wide">Resolución de Magnitudes
+                        S.I.</span>
                     <div id="physics-output-latex" class="py-4 overflow-x-auto text-center text-zinc-200">
                         $$ Esperando datos... $$
                     </div>
@@ -115,14 +185,17 @@
         <div id="panel-poly" class="hidden glass-card rounded-2xl p-6 md:p-8 shadow-2xl space-y-6 animate-fade-in">
             <div class="flex items-center gap-3 border-b border-white/5 pb-4">
                 <i data-lucide="layers" class="text-pink-400 w-4 h-4"></i>
-                <h2 class="text-xs font-semibold font-mono uppercase tracking-wider text-zinc-200">Operaciones Combinadas</h2>
+                <h2 class="text-xs font-semibold font-mono uppercase tracking-wider text-zinc-200">Operaciones
+                    Combinadas</h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-4">
                     <h3 class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Términos de Longitud</h3>
                     <div class="grid grid-cols-3 gap-2 items-center">
-                        <input type="number" id="poly-a-val" value="4.5" class="bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none text-zinc-100">
-                        <select id="poly-a-unit" class="bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs focus:outline-none text-zinc-100">
+                        <input type="number" id="poly-a-val" value="4.5"
+                            class="bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none text-zinc-100">
+                        <select id="poly-a-unit"
+                            class="bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs focus:outline-none text-zinc-100">
                             <option value="dm">dm</option>
                             <option value="m" selected>m</option>
                             <option value="dam">dam</option>
@@ -131,8 +204,10 @@
                         <span class="text-[10px] font-mono text-zinc-500 text-center">(Término A)</span>
                     </div>
                     <div class="grid grid-cols-3 gap-2 items-center">
-                        <input type="number" id="poly-b-val" value="940" class="bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none text-zinc-100">
-                        <select id="poly-b-unit" class="bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs focus:outline-none text-zinc-100">
+                        <input type="number" id="poly-b-val" value="940"
+                            class="bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none text-zinc-100">
+                        <select id="poly-b-unit"
+                            class="bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs focus:outline-none text-zinc-100">
                             <option value="mm">mm</option>
                             <option value="cm">cm</option>
                             <option value="m" selected>m</option>
@@ -140,8 +215,10 @@
                         <span class="text-[10px] font-mono text-zinc-500 text-center">+ (Término B)</span>
                     </div>
                     <div class="grid grid-cols-3 gap-2 items-center">
-                        <input type="number" id="poly-c-val" value="400" class="bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none text-zinc-100">
-                        <select id="poly-c-unit" class="bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs focus:outline-none text-zinc-100">
+                        <input type="number" id="poly-c-val" value="400"
+                            class="bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none text-zinc-100">
+                        <select id="poly-c-unit"
+                            class="bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs focus:outline-none text-zinc-100">
                             <option value="m" selected>m</option>
                         </select>
                         <span class="text-[10px] font-mono text-zinc-500 text-center">- (Término C)</span>
@@ -149,24 +226,30 @@
                     <div class="h-px bg-white/5"></div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[9px] font-mono text-zinc-500 mb-1.5 uppercase">Multiplicador (D)</label>
+                            <label class="block text-[9px] font-mono text-zinc-500 mb-1.5 uppercase">Multiplicador
+                                (D)</label>
                             <div class="flex gap-2">
-                                <input type="number" id="poly-d-val" value="59.8" class="bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none text-zinc-100 w-1/2">
-                                <select id="poly-d-unit" class="bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs focus:outline-none text-zinc-100 w-1/2">
+                                <input type="number" id="poly-d-val" value="59.8"
+                                    class="bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none text-zinc-100 w-1/2">
+                                <select id="poly-d-unit"
+                                    class="bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs focus:outline-none text-zinc-100 w-1/2">
                                     <option value="m" selected>m</option>
                                     <option value="cm">cm</option>
                                 </select>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-[9px] font-mono text-zinc-500 mb-1.5 uppercase">Unidad Destino</label>
-                            <select id="poly-target" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs focus:outline-none text-zinc-100">
+                            <label class="block text-[9px] font-mono text-zinc-500 mb-1.5 uppercase">Unidad
+                                Destino</label>
+                            <select id="poly-target"
+                                class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs focus:outline-none text-zinc-100">
                                 <option value="ft^2">ft² (Pies²)</option>
                                 <option value="m^2">m² (Metros²)</option>
                             </select>
                         </div>
                     </div>
-                    <button id="btn-solve-poly" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-xs font-semibold transition-all">
+                    <button id="btn-solve-poly"
+                        class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-xs font-semibold transition-all">
                         Resolver Polinomio de Área
                     </button>
                 </div>
@@ -189,4 +272,5 @@
     <script src="conversions.js" type="module"></script>
     <script src="formulas.js" type="module"></script>
 </body>
+
 </html>

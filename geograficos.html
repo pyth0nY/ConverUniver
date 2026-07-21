@@ -78,15 +78,26 @@
 
                     <!-- Selector de Sistema de Coordenadas -->
                     <div class="space-y-1.5">
+                    
+                    <div class="space-y-1.5">
                         <label class="block text-[10px] font-mono text-zinc-500 uppercase">Sistema de Coordenadas</label>
                         <select id="coord-system" class="w-full bg-zinc-900 border border-white/10 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-indigo-500 text-zinc-100 font-sans">
-                            <option value="rect-2d">Rectangulares 2D (x, y)</option>
-                            <option value="rect-3d" selected>Rectangulares 3D (x, y, z)</option>
-                            <option value="polar-2d">Polares 2D (r, θ)</option>
-                            <option value="cylindrical-3d">Cilíndricas 3D (r, θ, z)</option>
-                            <option value="spherical-3d">Esféricas 3D (ρ, θ, φ)</option>
-                            <option value="formula-free">Fórmula Libre (Superficie 3D)</option>
+                            <optgroup label="Sistemas de Coordenadas">
+                                <option value="rect-2d">Rectangulares 2D (x, y)</option>
+                                <option value="rect-3d" selected>Rectangulares 3D (x, y, z)</option>
+                                <option value="polar-2d">Polares 2D (r, θ)</option>
+                                <option value="cylindrical-3d">Cilíndricas 3D (r, θ, z)</option>
+                                <option value="spherical-3d">Esféricas 3D (ρ, θ, φ)</option>
+                                <option value="formula-free">Fórmula Libre (Superficie 3D)</option>
+                            </optgroup>
+                            <optgroup label="Secciones Cónicas (2D)">
+                                <option value="conic-circle">Circunferencia</option>
+                                <option value="conic-ellipse">Elipse</option>
+                                <option value="conic-parabola">Parábola</option>
+                                <option value="conic-hyperbola">Hipérbola</option>
+                            </optgroup>
                         </select>
+                    </div>
                     </div>
 
                     <!-- Inputs Dinámicos -->
@@ -140,7 +151,7 @@
 
     <!-- Footer -->
     <footer class="w-full text-center py-6 border-t border-white/5 text-[10px] text-zinc-600 font-mono">
-       &copy; 2027 Conversor Universal. Todos los derechos reservados.
+       &copy; 2026 Conversor Universal. Todos los derechos reservados.
     </footer>
 
     <!-- Script de control del Preloader -->

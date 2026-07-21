@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const outputRep = document.getElementById('output-cartesian-repr');
     const plotCanvas = document.getElementById('plot-canvas');
 
-    // --- FUNCIÓN DE CONTROL DE RENDERIZADO MATHJAX (CORREGIDA Y SEGURA) ---
+    // --- FUNCIÓN DE CONTROL DE RENDERIZADO MATHJAX (CON SENSADO DE CARGA ASÍNCRONA) ---
     function renderMath(element, latexString) {
         element.innerHTML = latexString;
         if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sys === 'rect-2d') {
             const x = getVal('in-x', 4);
             const y = getVal('in-y', 3);
-            infoText = `$ P = (${x.toFixed(4)}, ${y.toFixed(4)}) $`;
+            infoText = `$$ P = (${x.toFixed(4)}, ${y.toFixed(4)}) $$`;
 
             const maxVal = Math.max(Math.abs(x), Math.abs(y), 5) * 1.25;
 
@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const x = getVal('in-x', 3);
             const y = getVal('in-y', 4);
             const z = getVal('in-z', 5);
-            infoText = `$ P = (${x.toFixed(4)}, ${y.toFixed(4)}, ${z.toFixed(4)}) $`;
+            infoText = `$$ P = (${x.toFixed(4)}, ${y.toFixed(4)}, ${z.toFixed(4)}) $$`;
 
             traces.push({
                 type: 'scatter3d', x: [0, x, x, 0, 0], y: [0, 0, y, y, 0], z: [0, 0, 0, 0, 0],
@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const px = r * Math.cos(thetaRad);
             const py = r * Math.sin(thetaRad);
-            infoText = `$ r = ${r}, \\theta = ${theta}^{\\circ} \\Rightarrow P = (${px.toFixed(4)}, ${py.toFixed(4)}) $`;
+            infoText = `$$ r = ${r}, \\theta = ${theta}^{\\circ} \\Rightarrow P = (${px.toFixed(4)}, ${py.toFixed(4)}) $$`;
 
             const limit = Math.max(r, 5) * 1.25;
 
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const cx = r * Math.cos(thetaRad);
             const cy = r * Math.sin(thetaRad);
-            infoText = `$ r = ${r}, \\theta = ${theta}^{\\circ}, z = ${zVal} \\Rightarrow P = (${cx.toFixed(4)}, ${cy.toFixed(4)}, ${zVal}) $`;
+            infoText = `$$ r = ${r}, \\theta = ${theta}^{\\circ}, z = ${zVal} \\Rightarrow P = (${cx.toFixed(4)}, ${cy.toFixed(4)}, ${zVal}) $$`;
 
             const baseCircle = getCircleCoords(r, 0);
             const topCircle = getCircleCoords(r, zVal);
@@ -466,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const sx = rho * Math.sin(phiRad) * Math.cos(thetaRad);
             const sy = rho * Math.sin(phiRad) * Math.sin(thetaRad);
             const sz = rho * Math.cos(phiRad);
-            infoText = `$ \\rho = ${rho}, \\theta = ${theta}^{\\circ}, \\phi = ${phi}^{\\circ} \\Rightarrow P = (${sx.toFixed(4)}, ${sy.toFixed(4)}, ${sz.toFixed(4)}) $`;
+            infoText = `$$ \\rho = ${rho}, \\theta = ${theta}^{\\circ}, \\phi = ${phi}^{\\circ} \\Rightarrow P = (${sx.toFixed(4)}, ${sy.toFixed(4)}, ${sz.toFixed(4)}) $$`;
 
             const sphereTraces = getSphereWireframe(rho);
             traces.push(...sphereTraces);
@@ -530,7 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const yMin = getVal('in-ymin', -5);
             const yMax = getVal('in-ymax', 5);
 
-            infoText = `$ z = ${formula.replace(/\*/g, ' \\cdot ')} $`;
+            infoText = `$$ z = ${formula.replace(/\*/g, ' \\cdot ')} $$`;
 
             const xVals = [], yVals = [];
             const stepX = (xMax - xMin) / 30;
@@ -581,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const h = getVal('in-h', 0);
             const k = getVal('in-k', 0);
             const r = Math.abs(getVal('in-r', 4));
-            infoText = `$ (x - ${h})^2 + (y - ${k})^2 = ${r}^2 $`;
+            infoText = `$$ (x - ${h})^2 + (y - ${k})^2 = ${r}^2 $$`;
 
             const circle = getCircleCoords(r, 0);
             const cx = circle.x.map(val => val + h);
@@ -609,7 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const k = getVal('in-k', 0);
             const a = Math.abs(getVal('in-a', 5));
             const b = Math.abs(getVal('in-b', 3));
-            infoText = `$ \\frac{(x - ${h})^2}{${a}^2} + \\frac{(y - ${k})^2}{${b}^2} = 1 $`;
+            infoText = `$$ \\frac{(x - ${h})^2}{${a}^2} + \\frac{(y - ${k})^2}{${b}^2} = 1 $$`;
 
             const ex = [], ey = [];
             for (let i = 0; i <= 360; i += 4) {
@@ -649,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const maxExtent = 12;
 
             if (orient === 'vertical') {
-                infoText = `$ (x - ${h})^2 = 4(${p})(y - ${k}) $`;
+                infoText = `$$ (x - ${h})^2 = 4(${p})(y - ${k}) $$`;
                 focusY = k + p;
 
                 for (let val = h - maxExtent; val <= h + maxExtent; val += 0.25) {
@@ -662,7 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     line: { color: '#fb7185', width: 2.2, dash: 'dash' }, name: 'Directriz y = k - p'
                 };
             } else {
-                infoText = `$ (y - ${k})^2 = 4(${p})(x - ${h}) $`;
+                infoText = `$$ (y - ${k})^2 = 4(${p})(x - ${h}) $$`;
                 focusX = h + p;
 
                 for (let val = k - maxExtent; val <= k + maxExtent; val += 0.25) {
@@ -708,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const limit = Math.max(a + Math.abs(h), b + Math.abs(k), 8) * 1.35;
 
             if (orient === 'horizontal') {
-                infoText = `$ \\frac{(x - ${h})^2}{${a}^2} - \\frac{(y - ${k})^2}{${b}^2} = 1 $`;
+                infoText = `$$ \\frac{(x - ${h})^2}{${a}^2} - \\frac{(y - ${k})^2}{${b}^2} = 1 $$`;
 
                 for (let t = -2.5; t <= 2.5; t += 0.08) {
                     const cosh = Math.cosh(t);
@@ -729,7 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     line: { color: 'rgba(255, 255, 255, 0.12)', width: 1.5, dash: 'dash' }, name: 'Asíntota 2'
                 };
             } else {
-                infoText = `$ \\frac{(y - ${k})^2}{${a}^2} - \\frac{(x - ${h})^2}{${b}^2} = 1 $`;
+                infoText = `$$ \\frac{(y - ${k})^2}{${a}^2} - \\frac{(x - ${h})^2}{${b}^2} = 1 $$`;
 
                 for (let t = -2.5; t <= 2.5; t += 0.08) {
                     const cosh = Math.cosh(t);
@@ -800,10 +800,16 @@ document.addEventListener('DOMContentLoaded', () => {
         updatePlot();
     }
 
+    // --- ESCUCHADOR GLOBAL DE CARGA DE MATHJAX ---
+    // En cuanto MathJax termina de cargar asíncronamente de internet, fuerza un repintado de la fórmula
+    window.addEventListener('MathJaxReady', () => {
+        updatePlot();
+    });
+
     selectSystem.addEventListener('change', updateForm);
     updateForm();
 
-    // --- CARÁCTERES RÁPIDOS ---
+   
     document.querySelectorAll('.btn-symbol').forEach(btn => {
         btn.addEventListener('click', () => {
             const focusedInput = document.activeElement;
@@ -819,3 +825,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+ 

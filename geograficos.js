@@ -1,8 +1,4 @@
-/**
- * Conversor Universal - Controlador de Visualización Científica Avanzada (Plotly.js)
- * Renderiza cilindros, esferas, rejillas de radar, secciones cónicas y superficies en tiempo real.
- */
-
+ 
 document.addEventListener('DOMContentLoaded', () => {
     const selectSystem = document.getElementById('coord-system');
     const inputsContainer = document.getElementById('inputs-container');

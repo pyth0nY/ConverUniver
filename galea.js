@@ -31,7 +31,54 @@ const btnCopyLatex = document.getElementById('btn-copy-latex');
 
 let activeTab = 'auto';
 
-// --- CONTROL DE PESTAÑAS ---
+// --- UTILIDADES DE FORMATEO CIENTÍFICO ---
+
+function formatScientificHTML(value) {
+    if (value === 0) return "0";
+    const exp = Math.floor(Math.log10(Math.abs(value)));
+    if (exp === 0) return parseFloat(value.toFixed(4)).toString();
+    const base = value / Math.pow(10, exp);
+    const formattedBase = parseFloat(base.toFixed(4)).toString();
+    return `${formattedBase} &times; 10<sup>${exp}</sup>`;
+}
+
+function formatScientificLaTeX(value) {
+    if (value === 0) return "0 \\times 10^{0}";
+    const exp = Math.floor(Math.log10(Math.abs(value)));
+    const base = value / Math.pow(10, exp);
+    const formattedBase = parseFloat(base.toFixed(4)).toString();
+    return `${formattedBase} \\times 10^{${exp}}`;
+}
+
+// --- GENERADOR UNIVERSAL DE UNIDADES AGRUPADAS (OPTGROUP) ---
+function generateUniversalUnitOptions() {
+    let html = '';
+    const groupNames = {
+        length: 'Longitud / Distancia',
+        area: 'Área / Superficie',
+        volume: 'Volumen',
+        energy: 'Energía / Potencia',
+        time: 'Tiempo',
+        mass: 'Masa',
+        pressure: 'Presión / Fuerza',
+        data: 'Datos / Información'
+    };
+
+    Object.keys(categories).forEach(catKey => {
+        const cat = categories[catKey];
+        const groupLabel = groupNames[catKey] || catKey;
+
+        html += `<optgroup label="${groupLabel}">`;
+        Object.keys(cat.units).forEach(unitKey => {
+            const u = cat.units[unitKey];
+            html += `<option value="${unitKey}">${u.name} (${u.symbol || unitKey})</option>`;
+        });
+        html += `</optgroup>`;
+    });
+    return html;
+}
+
+// --- CONTROL DE PESTAÑAS (TABS) ---
 tabAuto.addEventListener('click', () => {
     activeTab = 'auto';
     tabAuto.className = 'px-6 py-2.5 rounded-xl text-xs font-medium transition-all duration-300 bg-white/5 text-slate-100';
@@ -51,26 +98,34 @@ tabFree.addEventListener('click', () => {
     }
 });
 
-// --- FUNCIÓN DE CONTROL DE RENDERIZADO MATHJAX (Saca el código crudo de pantalla) ---
-function renderMath(element, latexString) {
-    element.innerHTML = latexString;
-    if (window.MathJax) {
-        try {
-            MathJax.typesetClear([element]);
-            MathJax.typesetPromise([element]).catch(err => console.error("MathJax error:", err));
-        } catch (e) {
-            console.error("Error typeset:", e);
-        }
+// --- EVITAR CONDICIÓN DE CARRERA (Race Conditions) ---
+function executeWithMathJax(callback) {
+    if (window.MathJax && typeof MathJax.typesetPromise === "function") {
+        callback();
+    } else {
+        setTimeout(() => executeWithMathJax(callback), 100);
     }
 }
 
-function formatScientificHTML(value) {
-    if (value === 0) return "0";
-    const exp = Math.floor(Math.log10(Math.abs(value)));
-    if (exp === 0) return parseFloat(value.toFixed(4)).toString();
-    const base = value / Math.pow(10, exp);
-    const formattedBase = parseFloat(base.toFixed(4)).toString();
-    return `${formattedBase} &times; 10<sup>${exp}</sup>`;
+// --- FUNCIÓN DE CONTROL DE RENDERIZADO MATHJAX ---
+function renderMath(element, latexString) {
+    if (window.MathJax && typeof MathJax.typesetClear === "function") {
+        try {
+            MathJax.typesetClear([element]);
+        } catch (e) {
+            console.warn("typesetClear error:", e);
+        }
+    }
+
+    element.innerHTML = latexString;
+
+    if (window.MathJax && typeof MathJax.typesetPromise === "function") {
+        try {
+            MathJax.typesetPromise([element]).catch(err => console.error("MathJax error:", err));
+        } catch (e) {
+            console.error("MathJax exception:", e);
+        }
+    }
 }
 
 // --- MODO AUTOMÁTICO ---
@@ -82,7 +137,7 @@ function populateDropdowns() {
 
     Object.keys(catData.units).forEach(key => {
         const u = catData.units[key];
-        
+
         const optFrom = document.createElement('option');
         optFrom.value = key;
         optFrom.textContent = `${u.name} (${u.symbol})`;
@@ -116,23 +171,34 @@ btnGenerate.addEventListener('click', () => {
     ]);
 });
 
-// --- MODO CREADOR LIBRE ---
+// --- MODO CREADOR LIBRE CON SELECTS DINÁMICOS ---
 function addFactorRow() {
     const div = document.createElement('div');
     div.className = 'flex flex-wrap items-center gap-2 bg-white/[0.01] p-3 rounded-xl border border-white/[0.03] animate-fade-in relative';
+
+    // Obtenemos las opciones agrupadas desde nuestra base de datos conversions.js
+    const universalOptions = generateUniversalUnitOptions();
+
     div.innerHTML = `
         <div class="flex flex-col items-center justify-center font-bold px-2 text-slate-500">×</div>
         <div class="flex flex-col gap-1.5 flex-grow">
+            <!-- Fila Superior (Numerador) -->
             <div class="flex gap-2 items-center">
                 <span class="text-[10px] font-mono text-slate-500 w-12 text-right">Arriba:</span>
-                <input type="number" placeholder="Valor" class="factor-top-val bg-[#121217] border border-white/10 rounded-lg px-2.5 py-1 w-24 text-xs focus:outline-none">
-                <input type="text" placeholder="Unidad" class="factor-top-unit bg-[#121217] border border-white/10 rounded-lg px-2.5 py-1 w-24 text-xs focus:outline-none">
+                <input type="number" placeholder="1" class="factor-top-val bg-[#121217] border border-white/10 rounded-lg px-2.5 py-1 w-24 text-xs focus:outline-none">
+                <select class="factor-top-unit bg-[#121217] border border-white/10 rounded-lg px-2 py-1 w-44 text-xs focus:outline-none cursor-pointer">
+                    ${universalOptions}
+                </select>
             </div>
+            <!-- Divisor -->
             <div class="h-px bg-white/10 w-full my-0.5"></div>
+            <!-- Fila Inferior (Denominador) -->
             <div class="flex gap-2 items-center">
                 <span class="text-[10px] font-mono text-slate-500 w-12 text-right">Abajo:</span>
-                <input type="number" placeholder="Valor" class="factor-bottom-val bg-[#121217] border border-white/10 rounded-lg px-2.5 py-1 w-24 text-xs focus:outline-none">
-                <input type="text" placeholder="Unidad" class="factor-bottom-unit bg-[#121217] border border-white/10 rounded-lg px-2.5 py-1 w-24 text-xs focus:outline-none">
+                <input type="number" placeholder="1" class="factor-bottom-val bg-[#121217] border border-white/10 rounded-lg px-2.5 py-1 w-24 text-xs focus:outline-none">
+                <select class="factor-bottom-unit bg-[#121217] border border-white/10 rounded-lg px-2 py-1 w-44 text-xs focus:outline-none cursor-pointer">
+                    ${universalOptions}
+                </select>
             </div>
         </div>
         <button class="btn-remove-factor p-1.5 hover:bg-rose-500/10 hover:text-rose-400 rounded-lg text-slate-500 transition-all">
@@ -152,7 +218,7 @@ btnAddFactor.addEventListener('click', addFactorRow);
 
 btnCalculateFree.addEventListener('click', () => {
     const initVal = parseFloat(freeInitVal.value) || 0;
-    const initUnit = freeInitUnit.value.trim();
+    const initUnit = freeInitUnit.value; // Ya no requiere .trim() porque viene de select
 
     const steps = [
         { value: initVal, unit: initUnit, isStart: true }
@@ -161,9 +227,9 @@ btnCalculateFree.addEventListener('click', () => {
     const factorRows = factorsContainer.children;
     for (let row of factorRows) {
         const topVal = parseFloat(row.querySelector('.factor-top-val').value) || 1;
-        const topUnit = row.querySelector('.factor-top-unit').value.trim();
+        const topUnit = row.querySelector('.factor-top-unit').value;
         const bottomVal = parseFloat(row.querySelector('.factor-bottom-val').value) || 1;
-        const bottomUnit = row.querySelector('.factor-bottom-unit').value.trim();
+        const bottomUnit = row.querySelector('.factor-bottom-unit').value;
 
         steps.push({
             topValue: topVal,
@@ -176,7 +242,7 @@ btnCalculateFree.addEventListener('click', () => {
     renderGaleraGrid(steps);
 });
 
-// --- RENDERIZADOR GENERAL DE GALERA ---
+// --- RENDERIZADOR GENERAL DE GALERA CON CANCELACIONES ---
 function renderGaleraGrid(steps) {
     const numeratorUnits = [];
     const denominatorUnits = [];
@@ -270,17 +336,17 @@ function renderGaleraGrid(steps) {
         </div>
     `;
 
-    finalResultDiv.innerHTML = `${formatScientificLaTeX(finalVal)} <span class="text-emerald-400 text-lg ml-1 font-semibold">${finalUnit}</span>`;
+    finalResultDiv.innerHTML = `${formatScientificHTML(finalVal)} <span class="text-emerald-400 text-lg ml-1 font-semibold">${finalUnit}</span>`;
 
-    const latexFormula = `\\frac{ ${latexNumerator.join(' \\cdot ')} }{ ${latexDenominator.join(' \\cdot ') || '1'} } = ${finalVal.toExponential(4)}\\text{ ${finalUnit} }`;
+    const latexFormula = `\\frac{ ${latexNumerator.join(' \\cdot ')} }{ ${latexDenominator.join(' \\cdot ') || '1'} } = ${formatScientificLaTeX(finalVal)}\\text{ ${finalUnit} }`;
     latexInput.value = latexFormula;
-    renderMath(latexOutput, `\\[ ${latexFormula} \\]`);
+    renderMath(latexOutput, `$$${latexFormula}$$`);
 
     playground.classList.remove('hidden');
 }
 
 latexInput.addEventListener('input', () => {
-    renderMath(latexOutput, `\\[ ${latexInput.value} \\]`);
+    renderMath(latexOutput, `$$${latexInput.value}$$`);
 });
 
 btnCopyLatex.addEventListener('click', () => {
@@ -295,8 +361,22 @@ btnCopyLatex.addEventListener('click', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     populateDropdowns();
-    if (latexInput) {
-        latexInput.value = "E = 15.5 \\text{ J/s} \\cdot (3.1536 \\times 10^{8} \\text{ s}) = 4.89 \\times 10^{9} \\text{ J}";
+
+    // Poblamos el selector de la magnitud inicial libre con todas las opciones agrupadas de conversions.js
+    if (freeInitUnit) {
+        freeInitUnit.innerHTML = generateUniversalUnitOptions();
+        freeInitUnit.value = 'm'; // Valor inicial por defecto para el ejemplo
     }
+
+    if (latexInput) {
+        latexInput.value = "E = 15.5 \\text{ m} \\cdot (1 \\times 10^{3} \\text{ mm}) = 1.55 \\times 10^{4} \\text{ mm}";
+    }
+
+    executeWithMathJax(() => {
+        if (latexOutput && latexInput) {
+            renderMath(latexOutput, `$$${latexInput.value}$$`);
+        }
+    });
+
     if (window.lucide) window.lucide.createIcons();
 });

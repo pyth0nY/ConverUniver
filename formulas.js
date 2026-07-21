@@ -1,26 +1,29 @@
 import { categories } from './conversions.js';
-
-// Navegación de pestañas
 const tabPhysics = document.getElementById('tab-physics');
 const tabPoly = document.getElementById('tab-poly');
 const panelPhysics = document.getElementById('panel-physics');
 const panelPoly = document.getElementById('panel-poly');
-
-// --- FUNCIÓN DE CONTROL DE RENDERIZADO MATHJAX (Saca el código crudo de pantalla) ---
 function renderMath(element, latexString) {
-    element.innerHTML = latexString;
-    if (window.MathJax) {
+    if (window.MathJax && typeof MathJax.typesetClear === "function") {
         try {
-            // Limpia el caché de renderizado para este elemento y lo vuelve a procesar
             MathJax.typesetClear([element]);
-            MathJax.typesetPromise([element]).catch(err => console.error("Error MathJax:", err));
         } catch (e) {
-            console.error("Error typeset:", e);
+            console.error("MathJax typesetClear error:", e);
+        }
+    }
+    
+ 
+    element.innerHTML = latexString;
+    
+    if (window.MathJax && typeof MathJax.typesetPromise === "function") {
+        try {
+            MathJax.typesetPromise([element]).catch(err => console.error("MathJax promise error:", err));
+        } catch (e) {
+            console.error("MathJax typesetPromise exception:", e);
         }
     }
 }
 
-// Utilidad local de formato científico para LaTeX
 function formatScientificLaTeX(value) {
     if (value === 0) return "0 \\times 10^{0}";
     const exp = Math.floor(Math.log10(Math.abs(value)));
@@ -34,7 +37,7 @@ tabPhysics.addEventListener('click', () => {
     panelPoly.classList.add('hidden');
     tabPhysics.className = 'px-5 py-2 rounded-xl text-xs font-medium transition-all bg-white/5 text-slate-100';
     tabPoly.className = 'px-5 py-2 rounded-xl text-xs font-medium transition-all text-slate-400 hover:text-slate-100';
-    solvePhysics(); // Forzar recalculado de muestra
+    solvePhysics();
 });
 
 tabPoly.addEventListener('click', () => {

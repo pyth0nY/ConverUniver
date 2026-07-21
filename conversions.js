@@ -1,8 +1,3 @@
-/**
- * QuantumScale - Motor de Conversiones Físicas Universales y Método de la Galera
- * Soporta prefijos SI estándar, factores compuestos, potencias de unidades y unidades imperiales.
- */
-
 // 1. Prefijos métricos estándar del Sistema Internacional (para conversor simple)
 export const prefixes = {
     pico:  { name: 'Pico',  multiplier: 1e-12, symbol: 'p' },

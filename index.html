@@ -1,129 +1,172 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full bg-[#0a0a0c] text-slate-100">
+<html lang="es" class="h-full">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conversor Universal</title>
+    <!-- Favicon para que se muestre el logo en la pestaña del navegador -->
+    <link rel="icon" type="image/png" href="logo.png">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter & JetBrains Mono -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="font-sans antialiased overflow-x-hidden min-h-screen flex flex-col justify-between">
+<!-- VIDEO DE FONDO PERMANENTE Y CAPA DE CONTRASTE -->
+    <video autoplay loop muted playsinline class="video-background">
+        <!-- Buscará primero tu archivo de video local en tu proyecto -->
+        <source src="video.mp4" type="video/mp4">
 
-    <!-- Fondos Épicos -->
-    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[120px] animate-blob-slow"></div>
-        <div class="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-violet-600/10 blur-[150px] animate-blob-alternate"></div>
-        <div class="absolute top-[40%] left-[35%] w-[300px] h-[300px] rounded-full bg-cyan-500/5 blur-[100px] animate-pulse"></div>
-        <div class="absolute inset-0 bg-[linear-gradient(to_right,#1f29370a_1px,transparent_1px),linear-gradient(to_bottom,#1f29370a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+    </video>
+    <div class="video-overlay"></div>
+<body class="antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500/30 selection:text-white">
+
+    <!-- PRE-LOADER ANIMADO -->
+    <div id="preloader" class="preloader-container">
+        <!-- Resplandor ambiental de fondo del loader -->
+        <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+            <div
+                class="absolute top-[35%] left-[35%] w-[300px] h-[300px] rounded-full bg-indigo-500/5 blur-[100px] animate-pulse">
+            </div>
+        </div>
+        <!-- Estructura del Loader -->
+        <div class="loader-ring">
+            <img src="logo.png" alt="Cargando..." class="loader-logo">
+        </div>
+        <span class="loader-text">Conversor Universal</span>
+        <!-- VIDEO DE FONDO 4K Y CAPA DE CONTRASTE -->
+    <video autoplay loop muted playsinline class="video-background">
+        <!-- Primero intentará cargar tu archivo local si lo colocas en tu carpeta -->
+        <source src="video.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
     </div>
 
-    <!-- Header Sincronizado -->
-    <header class="w-full max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row gap-4 justify-between items-center border-b border-white/5 backdrop-blur-md">
+    <!-- El resto de tu código HTML habitual (Blobs, Header, Main, etc.) -->
+
+    <!-- Header con el Logo Limpio y Sin Caja -->
+    <header
+        class="w-full max-w-5xl mx-auto px-6 py-6 flex flex-col md:flex-row gap-4 justify-between items-center border-b border-white/5 backdrop-blur-md">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
-                <div class="w-full h-full bg-[#0d0d11] rounded-[11px] flex items-center justify-center">
-                    <i data-lucide="scale" class="w-5 h-5 text-indigo-400"></i>
-                </div>
-            </div>
+            <!-- El logo ahora flota de manera transparente y sin caja -->
+            <img src="logo.png" alt="Conversor Universal"
+                class="h-10 w-auto object-contain spring-transition hover:opacity-80">
             <div>
-                <span class="font-mono text-xs uppercase tracking-widest text-indigo-400">Escala de Magnitud</span>
-                <h1 class="text-lg font-semibold tracking-tight leading-none">QuantumScale Pro</h1>
+                <span class="font-mono text-[9px] uppercase tracking-widest text-zinc-500">Módulo de Magnitudes</span>
+                <h1 class="text-sm font-semibold tracking-tight text-zinc-100">Conversor Universal</h1>
             </div>
         </div>
-        <!-- Navegación Unificada -->
-        <div class="flex items-center gap-2 bg-white/[0.02] p-1 rounded-xl border border-white/5">
-            <a href="index.html" class="text-xs font-medium px-4 py-2 rounded-lg transition-all bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+        <!-- Menú de Navegación -->
+        <!-- Menú Unificado Sincronizado -->
+        <nav class="flex items-center gap-1.5 bg-zinc-950/80 p-1 rounded-xl border border-white/5 shadow-inner">
+            <a href="index.html" class="nav-link text-xs font-medium px-4 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
                 Conversor
             </a>
-            <a href="galea.html" class="text-xs font-medium px-4 py-2 rounded-lg transition-all text-slate-400 hover:text-slate-100">
+            <a href="galea.html" class="nav-link text-xs font-medium px-4 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
                 Método de Galera
             </a>
-            <a href="formulas.html" class="text-xs font-medium px-4 py-2 rounded-lg transition-all text-slate-400 hover:text-slate-100">
-                Fórmulas/Polinomios
+            <a href="formulas.html" class="nav-link text-xs font-medium px-4 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+                Fórmulas
             </a>
-        </div>
+            <a href="geograficos.html" class="nav-link text-xs font-medium px-4 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+                Geográficos
+            </a>
+        </nav>
     </header>
 
-    <!-- Main App Container -->
+    <!-- Contenedor Principal del Conversor -->
     <main class="flex-grow flex items-center justify-center px-4 py-12">
-        <div class="w-full max-w-2xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-2xl rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
-            
-            <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        <div
+            class="w-full max-w-lg glass-card rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden animate-fade-in">
+            <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent">
+            </div>
 
-            <!-- Selectores de Categoría -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-8 bg-white/[0.03] p-1.5 rounded-2xl border border-white/5">
-                <button data-category="length" class="category-btn active-tab flex flex-col items-center gap-2 py-3 rounded-xl transition-all duration-300">
-                    <i data-lucide="ruler" class="w-5 h-5"></i>
-                    <span class="text-xs font-medium">Distancia</span>
+            <!-- Selector de Categorías -->
+            <div class="grid grid-cols-4 gap-1 mb-8 bg-zinc-950/60 p-1 rounded-xl border border-white/5">
+                <button data-category="length"
+                    class="category-btn active-tab flex flex-col items-center gap-1.5 py-2.5 rounded-lg transition-all duration-300">
+                    <i data-lucide="ruler" class="w-4 h-4"></i>
+                    <span class="text-[10px] font-medium">Distancia</span>
                 </button>
-                <button data-category="mass" class="category-btn flex flex-col items-center gap-2 py-3 rounded-xl transition-all duration-300">
-                    <i data-lucide="dumbbell" class="w-5 h-5 text-slate-400"></i>
-                    <span class="text-xs font-medium text-slate-400">Masa</span>
+                <button data-category="mass"
+                    class="category-btn flex flex-col items-center gap-1.5 py-2.5 rounded-lg transition-all duration-300">
+                    <i data-lucide="dumbbell" class="w-4 h-4 text-zinc-500"></i>
+                    <span class="text-[10px] font-medium text-zinc-500">Masa</span>
                 </button>
-                <button data-category="energy" class="category-btn flex flex-col items-center gap-2 py-3 rounded-xl transition-all duration-300">
-                    <i data-lucide="zap" class="w-5 h-5 text-slate-400"></i>
-                    <span class="text-xs font-medium text-slate-400">Energía</span>
+                <button data-category="energy"
+                    class="category-btn flex flex-col items-center gap-1.5 py-2.5 rounded-lg transition-all duration-300">
+                    <i data-lucide="zap" class="w-4 h-4 text-zinc-500"></i>
+                    <span class="text-[10px] font-medium text-zinc-500">Energía</span>
                 </button>
-                <button data-category="data" class="category-btn flex flex-col items-center gap-2 py-3 rounded-xl transition-all duration-300">
-                    <i data-lucide="database" class="w-5 h-5 text-slate-400"></i>
-                    <span class="text-xs font-medium text-slate-400">Datos</span>
+                <button data-category="data"
+                    class="category-btn flex flex-col items-center gap-1.5 py-2.5 rounded-lg transition-all duration-300">
+                    <i data-lucide="database" class="w-4 h-4 text-zinc-500"></i>
+                    <span class="text-[10px] font-medium text-zinc-500">Datos</span>
                 </button>
             </div>
 
-            <!-- Interfaz del Conversor -->
-            <div class="space-y-6">
-                
+            <!-- Interfaz Interactiva -->
+            <div class="space-y-4">
+
                 <!-- Input Card -->
-                <div class="bg-white/[0.03] border border-white/5 p-5 rounded-2xl relative transition-all duration-300 focus-within:border-indigo-500/50">
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="text-xs font-mono text-slate-400 uppercase tracking-wider">Entrada (Desde)</label>
-                        <select id="prefix-from" class="bg-[#121217] text-sm text-slate-200 border border-white/10 rounded-lg px-2.5 py-1 focus:outline-none"></select>
+                <div class="bg-zinc-950/45 border border-white/5 p-4 rounded-xl transition-all duration-300 focus-glow">
+                    <div class="flex justify-between items-center mb-2.5">
+                        <label class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">Entrada</label>
+                        <select id="prefix-from"
+                            class="bg-zinc-900 text-xs text-zinc-300 border border-white/10 rounded-lg px-2 py-1 focus:outline-none focus:border-zinc-700"></select>
                     </div>
                     <div class="flex items-center gap-4">
-                        <input type="number" id="val-input" value="1" placeholder="0.00" class="bg-transparent text-3xl font-light w-full focus:outline-none">
-                        <span id="unit-symbol-from" class="text-lg font-mono text-indigo-400 font-semibold min-w-[45px] text-right">nm</span>
+                        <input type="number" id="val-input" value="1" placeholder="0.00"
+                            class="bg-transparent text-3xl font-light w-full focus:outline-none text-zinc-100 placeholder:text-zinc-700 font-sans">
+                        <span id="unit-symbol-from"
+                            class="text-sm font-mono text-indigo-400 font-semibold min-w-[45px] text-right">nm</span>
                     </div>
                 </div>
 
                 <!-- Swap Button -->
-                <div class="flex justify-center -my-3 relative z-10">
-                    <button id="btn-swap" class="w-10 h-10 rounded-full bg-[#121217] border border-white/10 flex items-center justify-center hover:border-indigo-500 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer shadow-lg group">
-                        <i data-lucide="arrow-up-down" class="w-4 h-4 text-slate-400 group-hover:text-indigo-400"></i>
+                <div class="flex justify-center -my-2.5 relative z-10">
+                    <button id="btn-swap"
+                        class="w-9 h-9 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center hover:border-zinc-700 active:scale-95 transition-all duration-300 cursor-pointer shadow-xl">
+                        <i data-lucide="arrow-up-down" class="w-4 h-4 text-zinc-400"></i>
                     </button>
                 </div>
 
                 <!-- Output Card -->
-                <div class="bg-gradient-to-br from-indigo-500/[0.03] to-purple-500/[0.03] border border-white/5 p-5 rounded-2xl relative">
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="text-xs font-mono text-indigo-300/80 uppercase tracking-wider">Resultado (Hacia)</label>
-                        <select id="prefix-to" class="bg-[#121217] text-sm text-slate-200 border border-white/10 rounded-lg px-2.5 py-1 focus:outline-none"></select>
+                <div class="bg-zinc-950/20 border border-white/5 p-4 rounded-xl">
+                    <div class="flex justify-between items-center mb-2.5">
+                        <label class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">Resultado</label>
+                        <select id="prefix-to"
+                            class="bg-zinc-900 text-xs text-zinc-300 border border-white/10 rounded-lg px-2 py-1 focus:outline-none focus:border-zinc-700"></select>
                     </div>
                     <div class="flex items-center gap-4">
-                        <div id="val-output" class="text-3xl font-light text-slate-100 truncate w-full">1.00000</div>
-                        <span id="unit-symbol-to" class="text-lg font-mono text-purple-400 font-semibold min-w-[45px] text-right">Pm</span>
+                        <div id="val-output" class="text-3xl font-light text-zinc-100 truncate w-full font-sans">1.00000
+                        </div>
+                        <span id="unit-symbol-to"
+                            class="text-sm font-mono text-violet-400 font-semibold min-w-[45px] text-right">Pm</span>
                     </div>
 
-                    <!-- Módulo Flotante: Notación Científica -->
-                    <div class="mt-4 pt-3 border-t border-white/5 flex justify-between items-center text-xs">
-                        <span class="text-slate-400 font-mono">Notación Científica:</span>
-                        <span id="scientific-output" class="font-mono bg-indigo-500/10 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/20 font-semibold"></span>
+                    <!-- Módulo de Notación Científica -->
+                    <div class="mt-4 pt-3 border-t border-white/5 flex justify-between items-center text-[11px]">
+                        <span class="text-zinc-500 font-mono">Notación Científica:</span>
+                        <span id="scientific-output"
+                            class="font-mono text-zinc-300 bg-zinc-950 px-2 py-1 rounded border border-white/5"></span>
                     </div>
                 </div>
 
-                <!-- Contexto Cósmico -->
-                <div id="comparison-card" class="bg-white/[0.01] border border-white/[0.03] p-4 rounded-xl flex items-start gap-4">
-                    <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 mt-0.5">
-                        <i data-lucide="info" class="w-4 h-4"></i>
+                <!-- Contexto de Escala Real -->
+                <div id="comparison-card"
+                    class="bg-zinc-950/40 border border-white/5 p-3.5 rounded-xl flex items-start gap-3">
+                    <div class="p-1.5 rounded bg-zinc-900 border border-white/5 text-zinc-500">
+                        <i data-lucide="info" class="w-3.5 h-3.5"></i>
                     </div>
                     <div>
-                        <h4 class="text-xs font-semibold text-slate-300 mb-1">Comparación Física</h4>
-                        <p id="comparison-text" class="text-xs text-slate-400 leading-relaxed font-light">
-                            Selecciona valores para entender la dimensión real de tu conversión.
+                        <h4 class="text-[9px] font-semibold text-zinc-400 mb-0.5 font-mono uppercase tracking-wide">
+                            Equivalencia Espacial</h4>
+                        <p id="comparison-text" class="text-xs text-zinc-400 leading-relaxed font-light">
+                            Ingresa un valor para calcular su proporción real.
                         </p>
                     </div>
                 </div>
@@ -133,11 +176,29 @@
     </main>
 
     <!-- Footer -->
-    <footer class="w-full text-center py-6 border-t border-white/5 text-xs text-slate-500 font-mono">
-        Conversor Universidal • Hecho con fines academicos y educativos
+    <footer class="w-full text-center py-6 border-t border-white/5 text-[10px] text-zinc-600 font-mono">
+        Conversor Universal • Metrología Integrada de Alto Rendimiento.
     </footer>
 
     <script src="conversions.js" type="module"></script>
     <script src="app.js" type="module"></script>
+    <!-- Script de control del Preloader (Temporizador de 10 segundos) -->
+    <script>
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                // Forzar una espera de 10 segundos (10000 ms) antes de iniciar la salida
+                setTimeout(() => {
+                    preloader.classList.add('preloader-hidden');
+                    
+                    // Remueve el elemento del DOM tras terminar la animación de desvanecimiento CSS (750ms)
+                    setTimeout(() => {
+                        preloader.remove();
+                    }, 750);
+                }, 5000); 
+            }
+        });
+    </script>
 </body>
+
 </html>

@@ -1,11 +1,9 @@
 import { prefixes, categories, convertScale, getMagnitudeDescription } from './conversions.js';
-
-// Elementos del DOM
 const selectFrom = document.getElementById('prefix-from');
 const selectTo = document.getElementById('prefix-to');
 const valInput = document.getElementById('val-input');
 const valOutput = document.getElementById('val-output');
-const scientificOutput = document.getElementById('scientific-output'); // Nuevo
+const scientificOutput = document.getElementById('scientific-output'); 
 const unitFrom = document.getElementById('unit-symbol-from');
 const unitTo = document.getElementById('unit-symbol-to');
 const btnSwap = document.getElementById('btn-swap');
@@ -13,13 +11,10 @@ const categoryButtons = document.querySelectorAll('.category-btn');
 const comparisonText = document.getElementById('comparison-text');
 
 let currentCategory = 'length';
-
-// Utilidad para dar formato estético a la notación científica
 export function formatScientific(value) {
     if (value === 0) return "0 × 10⁰";
     const exp = Math.floor(Math.log10(Math.abs(value)));
     const base = value / Math.pow(10, exp);
-    // Redondear base a un número razonable de decimales sin ceros a la derecha
     const formattedBase = parseFloat(base.toFixed(4)).toString();
     return `${formattedBase} × 10<sup>${exp}</sup>`;
 }
@@ -71,7 +66,7 @@ function processConversion() {
         valOutput.textContent = parseFloat(result.toFixed(6)).toString();
     }
 
-    // Salida Notación Científica Épica
+    // Salida Notación Científica
     scientificOutput.innerHTML = formatScientific(result);
 
     comparisonText.textContent = getMagnitudeDescription(inputVal, fromPref, currentCategory);

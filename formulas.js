@@ -73,6 +73,61 @@ const extendedCategories = {
         units: {
             'SI': { name: 'Unidad S.I.', multiplier: 1, symbol: '' }
         }
+    },
+    // NUEVAS CATEGORÍAS COMPUESTAS PARA ANÁLISIS DIMENSIONAL UNIVERSAL
+    pressure_length: {
+        unitName: 'Presión por Longitud',
+        baseSymbol: 'Pa*m',
+        units: {
+            'Pa*m': { name: 'Pascal metro', multiplier: 1, symbol: 'Pa*m' },
+            'Pa*in': { name: 'Pascal pulgada', multiplier: 0.0254, symbol: 'Pa*in' },
+            'psi*in': { name: 'Psi pulgada', multiplier: 6894.757 * 0.0254, symbol: 'psi*in' },
+            'kPa*m': { name: 'Kilopascal metro', multiplier: 1000, symbol: 'kPa*m' }
+        }
+    },
+    mass_length: {
+        unitName: 'Masa por Longitud',
+        baseSymbol: 'kg*m',
+        units: {
+            'kg*m': { name: 'Kilogramo metro', multiplier: 1, symbol: 'kg*m' },
+            'g*cm': { name: 'Gramo centímetro', multiplier: 1e-5, symbol: 'g*cm' },
+            'lb*ft': { name: 'Libra pie', multiplier: 0.45359237 * 0.3048, symbol: 'lb*ft' }
+        }
+    },
+    length_acceleration: {
+        unitName: 'Velocidad al Cuadrado',
+        baseSymbol: 'm2/s2',
+        units: {
+            'm2/s2': { name: 'Metros²/segundo²', multiplier: 1, symbol: 'm2/s2' }
+        }
+    },
+    force_acceleration: {
+        unitName: 'Fuerza por Aceleración',
+        baseSymbol: 'N*m/s2',
+        units: {
+            'N*m/s2': { name: 'Newton metro/segundo²', multiplier: 1, symbol: 'N*m/s2' }
+        }
+    },
+    force_area: {
+        unitName: 'Fuerza por Área',
+        baseSymbol: 'N*m2',
+        units: {
+            'N*m2': { name: 'Newton metro²', multiplier: 1, symbol: 'N*m2' }
+        }
+    },
+    mass_area: {
+        unitName: 'Masa por Área',
+        baseSymbol: 'kg*m2',
+        units: {
+            'kg*m2': { name: 'Kilogramo metro²', multiplier: 1, symbol: 'kg*m2' }
+        }
+    },
+    pressure_acceleration: {
+        unitName: 'Presión por Aceleración',
+        baseSymbol: 'Pa*m/s2',
+        units: {
+            'Pa*m/s2': { name: 'Pascal metro/segundo²', multiplier: 1, symbol: 'Pa*m/s2' }
+        }
     }
 };
 
@@ -94,13 +149,30 @@ function renderMath(element, latexString) {
     }
 }
 
+// Formateador de Notación Científica estricta para LaTeX
 function formatScientificLaTeX(value) {
     if (value === 0) return "0 \\times 10^{0}";
-    const exp = Math.floor(Math.log10(Math.abs(value)));
-    if (Math.abs(exp) < 3) return parseFloat(value.toFixed(4)).toString();
-    const base = value / Math.pow(10, exp);
+    const isNegative = value < 0;
+    const absVal = Math.abs(value);
+    
+    const exp = Math.floor(Math.log10(absVal));
+    const base = absVal / Math.pow(10, exp);
     const formattedBase = parseFloat(base.toFixed(4)).toString();
-    return `${formattedBase} \\times 10^{${exp}}`;
+    const sign = isNegative ? "-" : "";
+    
+    return `${sign}${formattedBase} \\times 10^{${exp}}`;
+}
+
+// Convertidor dinámico de unidades a sintaxis LaTeX con potencias elevadas y puntos medios de multiplicación
+function formatUnitLaTeX(unitStr) {
+    if (!unitStr) return '';
+    // Reemplaza asteriscos o puntos medios crudos por el punto medio formal de LaTeX
+    let formatted = unitStr.replace(/[\*·]/g, ' \\cdot ');
+    // Convierte letras a fuentes de texto y eleva los exponentes
+    formatted = formatted.replace(/([a-zA-Z]+)\^?(\d+)?/g, (match, p1, p2) => {
+        return p2 ? `\\text{${p1}}^{${p2}}` : `\\text{${p1}}`;
+    });
+    return formatted;
 }
 
 tabPhysics.addEventListener('click', () => {
@@ -739,60 +811,290 @@ selectEquation.addEventListener('change', () => {
 });
 btnSolvePhysics.addEventListener('click', solvePhysics);
 
-// --- LÓGICA DE POLINOMIOS ---
+// --- ARREGLO DE TÉRMINOS DINÁMICOS PARA EL POLINOMIO ---
+let polyTerms = [
+    { value: 4.5, unit: 'um', operator: '+' },
+    { value: 940, unit: 'dam', operator: '+' },
+    { value: 400, unit: 'mi', operator: '-' }
+];
+
+const polyTermCat = document.getElementById('poly-term-cat');
+const polyMultCat = document.getElementById('poly-mult-cat');
+const polyTermsContainer = document.getElementById('poly-terms-container');
+const btnAddPolyTerm = document.getElementById('btn-add-poly-term');
+
+function renderPolyTerms() {
+    if (!polyTermsContainer) return;
+    polyTermsContainer.innerHTML = '';
+    const catKey = polyTermCat.value;
+    const units = extendedCategories[catKey].units;
+
+    polyTerms.forEach((term, index) => {
+        const row = document.createElement('div');
+        row.className = 'grid grid-cols-12 gap-2 items-center animate-fade-in';
+
+        // Selector de operador (+ / -) para términos subsecuentes
+        let operatorHTML = '';
+        if (index === 0) {
+            operatorHTML = `<span class="col-span-2 text-[9px] font-mono text-zinc-500 text-center uppercase tracking-wide">Inicio</span>`;
+        } else {
+            operatorHTML = `
+                <select class="term-operator col-span-2 bg-zinc-900 border border-white/10 rounded-lg px-1.5 py-1.5 text-xs text-zinc-300 focus:outline-none" data-index="${index}">
+                    <option value="+" ${term.operator === '+' ? 'selected' : ''}>+</option>
+                    <option value="-" ${term.operator === '-' ? 'selected' : ''}>-</option>
+                </select>
+            `;
+        }
+
+        // Campo numérico del valor
+        const valueHTML = `
+            <input type="number" value="${term.value}" class="term-value col-span-4 bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700" data-index="${index}" step="any">
+        `;
+
+        // Selector de unidad física
+        let unitOptions = '';
+        Object.keys(units).forEach(uKey => {
+            const u = units[uKey];
+            const selected = uKey === term.unit ? 'selected' : '';
+            unitOptions += `<option value="${uKey}" ${selected}>${u.symbol || uKey} (${u.name})</option>`;
+        });
+
+        const unitHTML = `
+            <select class="term-unit col-span-4 bg-zinc-900 border border-white/10 rounded-lg px-1.5 py-1.5 text-xs text-zinc-300 focus:outline-none" data-index="${index}">
+                ${unitOptions}
+            </select>
+        `;
+
+        // Botón de eliminar término
+        let deleteHTML = '';
+        if (index === 0) {
+            deleteHTML = `<div class="col-span-2"></div>`;
+        } else {
+            deleteHTML = `
+                <button class="btn-delete-term col-span-2 p-1.5 hover:bg-rose-500/10 hover:text-rose-400 rounded-lg text-zinc-500 transition-all flex justify-center" data-index="${index}">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            `;
+        }
+
+        row.innerHTML = operatorHTML + valueHTML + unitHTML + deleteHTML;
+        polyTermsContainer.appendChild(row);
+    });
+
+    bindPolynomialEvents();
+    if (window.lucide) window.lucide.createIcons();
+}
+
+function bindPolynomialEvents() {
+    // Escuchar cambios de valor
+    document.querySelectorAll('.term-value').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const idx = parseInt(e.target.getAttribute('data-index'));
+            polyTerms[idx].value = parseFloat(e.target.value) || 0;
+        });
+    });
+
+    // Escuchar cambios de unidad
+    document.querySelectorAll('.term-unit').forEach(select => {
+        select.addEventListener('change', (e) => {
+            const idx = parseInt(e.target.getAttribute('data-index'));
+            polyTerms[idx].unit = e.target.value;
+        });
+    });
+
+    // Escuchar cambios de operador
+    document.querySelectorAll('.term-operator').forEach(select => {
+        select.addEventListener('change', (e) => {
+            const idx = parseInt(e.target.getAttribute('data-index'));
+            polyTerms[idx].operator = e.target.value;
+        });
+    });
+
+    // Escuchar borrado de filas
+    document.querySelectorAll('.btn-delete-term').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const idx = parseInt(e.currentTarget.getAttribute('data-index'));
+            polyTerms.splice(idx, 1);
+            renderPolyTerms();
+        });
+    });
+}
+
+// Botón dinámico para añadir nuevos términos
+if (btnAddPolyTerm) {
+    btnAddPolyTerm.addEventListener('click', (e) => {
+        e.preventDefault();
+        const catKey = polyTermCat.value;
+        // Asignar por defecto la primera unidad de la lista
+        const defaultUnit = Object.keys(extendedCategories[catKey].units)[0];
+        polyTerms.push({ value: 10, unit: defaultUnit, operator: '+' });
+        renderPolyTerms();
+    });
+}
+
+// Recalcular unidades dinámicas de entrada e inyectar en el destino de forma dimensionalmente correcta
+function updateDimensionalConfiguration() {
+    const termCat = polyTermCat.value;
+    const multCat = polyMultCat.value;
+    const dUnitSelect = document.getElementById('poly-d-unit');
+    const targetSelect = document.getElementById('poly-target');
+    const targetLabel = document.getElementById('lbl-target-cat');
+
+    if (!dUnitSelect || !targetSelect) return;
+
+    // 1. Repoblar el selector de unidades del Multiplicador (D)
+    const multUnits = extendedCategories[multCat].units;
+    const prevDUnit = dUnitSelect.value;
+    dUnitSelect.innerHTML = '';
+    Object.keys(multUnits).forEach(uKey => {
+        const u = multUnits[uKey];
+        const opt = document.createElement('option');
+        opt.value = uKey;
+        opt.textContent = `${u.symbol || uKey} (${u.name})`;
+        if (uKey === prevDUnit) opt.selected = true;
+        dUnitSelect.appendChild(opt);
+    });
+
+    // 2. Determinar la categoría dimensional resultante de forma física
+    let resultCat = 'generic_val';
+    if (termCat === 'length' && multCat === 'length') resultCat = 'area';
+    else if (termCat === 'length' && multCat === 'area') resultCat = 'volume';
+    else if (termCat === 'length' && multCat === 'acceleration') resultCat = 'length_acceleration';
+    else if (termCat === 'force_unit' && multCat === 'length') resultCat = 'energy';
+    else if (termCat === 'force_unit' && multCat === 'acceleration') resultCat = 'force_acceleration';
+    else if (termCat === 'force_unit' && multCat === 'area') resultCat = 'force_area';
+    else if (termCat === 'mass' && multCat === 'length') resultCat = 'mass_length';
+    else if (termCat === 'mass' && multCat === 'acceleration') resultCat = 'force_unit';
+    else if (termCat === 'mass' && multCat === 'area') resultCat = 'mass_area';
+    else if (termCat === 'pressure' && multCat === 'length') resultCat = 'pressure_length';
+    else if (termCat === 'pressure' && multCat === 'acceleration') resultCat = 'pressure_acceleration';
+    else if (termCat === 'pressure' && multCat === 'area') resultCat = 'force_unit';
+
+    // 3. Repoblar el selector de Unidad Destino basada en la categoría física resultante
+    const resultUnits = extendedCategories[resultCat].units;
+    const prevTarget = targetSelect.value;
+    targetSelect.innerHTML = '';
+    Object.keys(resultUnits).forEach(uKey => {
+        const u = resultUnits[uKey];
+        const opt = document.createElement('option');
+        opt.value = uKey;
+        opt.textContent = `${u.symbol || uKey} (${u.name})`;
+        if (uKey === prevTarget) opt.selected = true;
+        targetSelect.appendChild(opt);
+    });
+
+    // Actualizar etiqueta del destino para mejor comprensión
+    targetLabel.textContent = `Unidad Destino (${extendedCategories[resultCat].unitName})`;
+
+    // Resetear las unidades de los términos dinámicos de la suma para que coincidan con la nueva categoría
+    const defaultUnit = Object.keys(extendedCategories[termCat].units)[0];
+    polyTerms.forEach(term => {
+        term.unit = defaultUnit;
+    });
+
+    renderPolyTerms();
+}
+
+if (polyTermCat) polyTermCat.addEventListener('change', updateDimensionalConfiguration);
+if (polyMultCat) polyMultCat.addEventListener('change', updateDimensionalConfiguration);
+
+// --- LÓGICA DE RESOLUCIÓN DE POLINOMIOS DINÁMICOS ---
 const btnSolvePoly = document.getElementById('btn-solve-poly');
 const polyOutput = document.getElementById('poly-output-latex');
 
 function solvePolynomial() {
-    const aVal = parseFloat(document.getElementById('poly-a-val').value) || 0;
-    const aUnit = document.getElementById('poly-a-unit').value;
-    const bVal = parseFloat(document.getElementById('poly-b-val').value) || 0;
-    const bUnit = document.getElementById('poly-b-unit').value;
-    const cVal = parseFloat(document.getElementById('poly-c-val').value) || 0;
-    const cUnit = document.getElementById('poly-c-unit').value;
+    if (polyTerms.length === 0) {
+        polyOutput.innerHTML = "$$\\text{Agrega al menos un término para calcular.}$$";
+        return;
+    }
+
+    const termCat = polyTermCat.value;
+    const multCat = polyMultCat.value;
+
+    let resultCat = 'generic_val';
+    if (termCat === 'length' && multCat === 'length') resultCat = 'area';
+    else if (termCat === 'length' && multCat === 'area') resultCat = 'volume';
+    else if (termCat === 'length' && multCat === 'acceleration') resultCat = 'length_acceleration';
+    else if (termCat === 'force_unit' && multCat === 'length') resultCat = 'energy';
+    else if (termCat === 'force_unit' && multCat === 'acceleration') resultCat = 'force_acceleration';
+    else if (termCat === 'force_unit' && multCat === 'area') resultCat = 'force_area';
+    else if (termCat === 'mass' && multCat === 'length') resultCat = 'mass_length';
+    else if (termCat === 'mass' && multCat === 'acceleration') resultCat = 'force_unit';
+    else if (termCat === 'mass' && multCat === 'area') resultCat = 'mass_area';
+    else if (termCat === 'pressure' && multCat === 'length') resultCat = 'pressure_length';
+    else if (termCat === 'pressure' && multCat === 'acceleration') resultCat = 'pressure_acceleration';
+    else if (termCat === 'pressure' && multCat === 'area') resultCat = 'force_unit';
+
     const dVal = parseFloat(document.getElementById('poly-d-val').value) || 0;
     const dUnit = document.getElementById('poly-d-unit').value;
+    const dSi = dVal * extendedCategories[multCat].units[dUnit].multiplier;
+    const unitD = formatUnitLaTeX(dUnit);
+
     const targetUnit = document.getElementById('poly-target').value;
+    const targetMultiplier = extendedCategories[resultCat].units[targetUnit].multiplier;
 
-    const aSi = aVal * extendedCategories.length.units[aUnit].multiplier;
-    const bSi = bVal * extendedCategories.length.units[bUnit].multiplier;
-    const cSi = cVal * extendedCategories.length.units[cUnit].multiplier;
-    const dSi = dVal * extendedCategories.length.units[dUnit].multiplier;
+    // Calcular el sumando iterando sobre el array dinámico en notación científica
+    let sumSi = 0;
+    const conversionStepsLatex = [];
+    const sumExpressionLatex = [];
 
-    const sumSi = aSi + bSi - cSi;
+    polyTerms.forEach((term, index) => {
+        const multiplier = extendedCategories[termCat].units[term.unit].multiplier;
+        const termSi = term.value * multiplier;
+        const formattedUnit = formatUnitLaTeX(term.unit);
+
+        conversionStepsLatex.push(`T_{${index + 1}} &= ${term.value}\\text{ }${formattedUnit} = ${formatScientificLaTeX(termSi)}\\text{ }\\text{${extendedCategories[termCat].baseSymbol}}`);
+
+        if (index === 0) {
+            sumSi = termSi;
+            sumExpressionLatex.push(formatScientificLaTeX(termSi));
+        } else {
+            if (term.operator === '+') {
+                sumSi += termSi;
+                sumExpressionLatex.push(`+ ${formatScientificLaTeX(termSi)}`);
+            } else {
+                sumSi -= termSi;
+                sumExpressionLatex.push(`- ${formatScientificLaTeX(termSi)}`);
+            }
+        }
+    });
+
     const areaSi = sumSi * dSi;
-
-    const targetMultiplier = extendedCategories.area.units[targetUnit].multiplier;
     const finalArea = areaSi / targetMultiplier;
 
+    const unitTarget = formatUnitLaTeX(targetUnit);
+
+    // Renderizado dinamico de notacion Cientifica
     const latexString = `
         $$\\begin{aligned}
-        \\text{Expresión Analizada: } & (A + B - C) \\cdot D \\\\
+        \\text{Expresión Analizada: } & (T_1 \\pm T_2 \\dots) \\cdot D \\\\
         \\\\
-        \\text{1. Conversión al S.I. (m):} \\\\
-        A &= ${aVal}\\text{ ${aUnit}} = ${aSi}\\text{ m} \\\\
-        B &= ${bVal}\\text{ ${bUnit}} = ${bSi}\\text{ m} \\\\
-        C &= ${cVal}\\text{ ${cUnit}} = ${cSi}\\text{ m} \\\\
-        D &= ${dVal}\\text{ ${dUnit}} = ${dSi}\\text{ m} \\\\
+        \\text{1. Conversión al S.I. (}${extendedCategories[termCat].baseSymbol}\\text{):} \\\\
+        ${conversionStepsLatex.join(' \\\\ ')} \\\\
+        D &= ${dVal}\\text{ }${unitD} = ${formatScientificLaTeX(dSi)}\\text{ }\\text{${extendedCategories[multCat].baseSymbol}} \\\\
         \\\\
-        \\text{2. Sumatoria de Longitudes:} \\\\
-        (A + B - C) &= (${aSi} + ${bSi} - ${cSi})\\text{ m} = ${sumSi}\\text{ m} \\\\
+        \\text{2. Sumatoria Intermedia:} \\\\
+        \\text{Suma} &= (${sumExpressionLatex.join(' ')})\\text{ }\\text{${extendedCategories[termCat].baseSymbol}} \\\\
+        &= ${formatScientificLaTeX(sumSi)}\\text{ }\\text{${extendedCategories[termCat].baseSymbol}} \\\\
         \\\\
-        \\text{3. Multiplicación de Superficie:} \\\\
-        \\text{Área (S.I.)} &= ${sumSi}\\text{ m} \\cdot ${dSi}\\text{ m} = ${areaSi.toFixed(4)}\\text{ m}^2 \\\\
+        \\text{3. Multiplicación Dimensional Resultante:} \\\\
+        \\text{Resultado (S.I.)} &= (${formatScientificLaTeX(sumSi)}\\text{ }\\text{${extendedCategories[termCat].baseSymbol}}) \\cdot (${formatScientificLaTeX(dSi)}\\text{ }\\text{${extendedCategories[multCat].baseSymbol}}) \\\\
+        &= ${formatScientificLaTeX(areaSi)}\\text{ }${formatUnitLaTeX(extendedCategories[resultCat].baseSymbol)} \\\\
         \\\\
-        \\text{4. Análisis de Galera Final a [${targetUnit}]:} \\\\
-        \\text{Resultado} &= ${areaSi.toFixed(4)}\\text{ m}^2 \\cdot \\frac{1\\text{ ${targetUnit}}}{${targetMultiplier}\\text{ m}^2} \\\\
-        &= ${formatScientificLaTeX(finalArea)}\\text{ ${targetUnit}}
+        \\text{4. Análisis de Galera Final a [}${unitTarget}\\text{]:} \\\\
+        \\text{Resultado} &= ${formatScientificLaTeX(areaSi)}\\text{ }${formatUnitLaTeX(extendedCategories[resultCat].baseSymbol)} \\cdot \\frac{1\\text{ }${unitTarget}}{${formatScientificLaTeX(targetMultiplier)}\\text{ }${formatUnitLaTeX(extendedCategories[resultCat].baseSymbol)}} \\\\
+        &= ${formatScientificLaTeX(finalArea)}\\text{ }${unitTarget}
         \\end{aligned}$$
     `;
 
     renderMath(polyOutput, latexString);
 }
 
-btnSolvePoly.addEventListener('click', solvePolynomial);
+if (btnSolvePoly) btnSolvePoly.addEventListener('click', solvePolynomial);
 
 document.addEventListener('DOMContentLoaded', () => {
+    updateDimensionalConfiguration();
     renderVariables();
     setTimeout(() => {
         solvePhysics();

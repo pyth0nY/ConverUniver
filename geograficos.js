@@ -1,16 +1,19 @@
- 
 document.addEventListener('DOMContentLoaded', () => {
     const selectSystem = document.getElementById('coord-system');
     const inputsContainer = document.getElementById('inputs-container');
     const outputRep = document.getElementById('output-cartesian-repr');
     const plotCanvas = document.getElementById('plot-canvas');
+    const btnExportObj = document.getElementById('btn-export-obj');
+
+    // Estado global de la gráfica activa para su posterior exportación
+    let current3DTraces = [];
+    let currentSystem = 'rect-3d';
 
     // --- FUNCIÓN DE CONTROL DE RENDERIZADO MATHJAX (CON SENSADO DE CARGA ASÍNCRONA) ---
     function renderMath(element, latexString) {
         element.innerHTML = latexString;
         if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
             try {
-                // Compila y dibuja el código LaTeX directamente en el elemento
                 MathJax.typesetPromise([element]).catch(err => console.error("Error MathJax:", err));
             } catch (e) {
                 console.error("Error typeset:", e);
@@ -18,16 +21,257 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- LEER INPUTS CON RESPALDO PREVENTIVO (EVITA CONGELAMIENTO POR NULOS) ---
+    // --- LEER INPUTS CON RESPALDO PREVENTIVO (EVITA CONGELAMIENTO POR NULOS O NaN) ---
     const getVal = (id, fallback) => {
         const el = document.getElementById(id);
-        return el ? (parseFloat(el.value) ?? fallback) : fallback;
+        if (!el) return fallback;
+        const val = parseFloat(el.value);
+        return isNaN(val) ? fallback : val;
     };
 
     const getSelectVal = (id, fallback) => {
         const el = document.getElementById(id);
         return el ? el.value : fallback;
     };
+
+    // --- CONSTRUCTORES DE FLECHAS VECTORIALES PARA LAS GRÁFICAS ---
+    
+    // Genera una flecha 2D usando un solo trazo continuo con saltos nulos
+    function get2DArrowTrace(x0, y0, x1, y1, color, name, dashed = false) {
+        const dx = x1 - x0;
+        const dy = y1 - y0;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const arrowLength = Math.min(0.4, len * 0.22);
+        const theta = Math.atan2(dy, dx);
+        const alpha = Math.PI / 6; // Ángulo de apertura de 30 grados para las puntas de flecha
+
+        const x_left = x1 - arrowLength * Math.cos(theta - alpha);
+        const y_left = y1 - arrowLength * Math.sin(theta - alpha);
+        const x_right = x1 - arrowLength * Math.cos(theta + alpha);
+        const y_right = y1 - arrowLength * Math.sin(theta + alpha);
+
+        return {
+            x: [x0, x1, x_left, null, x1, x_right],
+            y: [y0, y1, y_left, null, y1, y_right],
+            mode: 'lines',
+            line: {
+                color: color,
+                width: 3.2,
+                dash: dashed ? 'dash' : 'solid'
+            },
+            name: name
+        };
+    }
+
+    // Genera un vector en 3D combinando un cuerpo de línea y una punta de cono cónico
+    function get3DArrowTraces(x0, y0, z0, x1, y1, z1, color, name, dashed = false) {
+        return [
+            {
+                type: 'scatter3d',
+                x: [x0, x1], y: [y0, y1], z: [z0, z1],
+                mode: 'lines',
+                line: { color: color, width: 4.5, dash: dashed ? 'dash' : 'solid' },
+                name: name
+            },
+            {
+                type: 'cone',
+                x: [x1], y: [y1], z: [z1],
+                u: [x1 - x0], v: [y1 - y0], w: [z1 - z0],
+                sizemode: 'absolute',
+                sizeref: 0.35,
+                colorscale: [[0, color], [1, color]],
+                showscale: false,
+                showlegend: false
+            }
+        ];
+    }
+
+    // --- PARSER DE FÓRMULAS ESCRITAS POR EL USUARIO A LATEX PROFESIONAL ---
+    function parseToLaTeX(expr) {
+        expr = expr.trim();
+        expr = removeOuterParentheses(expr);
+
+        // Busca si hay una división '/' en el nivel principal de paréntesis
+        const divIdx = findTopLevelOp(expr, '/');
+        if (divIdx !== -1) {
+            const left = expr.substring(0, divIdx);
+            const right = expr.substring(divIdx + 1);
+            return `\\frac{${parseToLaTeX(left)}}{${parseToLaTeX(right)}}`;
+        }
+
+        // Reconoce y convierte funciones matemáticas estándar
+        const funcRegex = /\b(sin|cos|tan|sqrt|abs|log|ln)\s*\(/g;
+        let processed = expr;
+        let foundFunc = true;
+        
+        while (foundFunc) {
+            foundFunc = false;
+            const m = processed.match(/\b(sin|cos|tan|sqrt|abs|log|ln)\s*\(/);
+            if (m) {
+                foundFunc = true;
+                const funcName = m[1];
+                const startIdx = m.index;
+                const openParenIdx = startIdx + funcName.length;
+                
+                // Busca el paréntesis de cierre correspondiente
+                let count = 1;
+                let closeParenIdx = -1;
+                for (let i = openParenIdx + 1; i < processed.length; i++) {
+                    if (processed[i] === '(') count++;
+                    else if (processed[i] === ')') count--;
+                    if (count === 0) {
+                        closeParenIdx = i;
+                        break;
+                    }
+                }
+                
+                if (closeParenIdx !== -1) {
+                    const arg = processed.substring(openParenIdx + 1, closeParenIdx);
+                    const formattedArg = parseToLaTeX(arg);
+                    
+                    let replacement = "";
+                    if (funcName === 'sqrt') {
+                        replacement = `\\sqrt{${formattedArg}}`;
+                    } else {
+                        replacement = `\\${funcName}\\left(${formattedArg}\\right)`;
+                    }
+                    
+                    processed = processed.substring(0, startIdx) + replacement + processed.substring(closeParenIdx + 1);
+                } else {
+                    processed = processed.replace(funcName + '(', '\\' + funcName + '\\(');
+                }
+            }
+        }
+
+        // Reemplaza otros operadores y símbolos comunes
+        processed = processed
+            .replace(/\*/g, ' \\cdot ')
+            .replace(/\bpi\b/g, '\\pi');
+
+        return processed;
+    }
+
+    // Busca la posición de un operador que no esté dentro de paréntesis
+    function findTopLevelOp(str, op) {
+        let parenCount = 0;
+        for (let i = 0; i < str.length; i++) {
+            if (str[i] === '(') parenCount++;
+            else if (str[i] === ')') parenCount--;
+            else if (str[i] === op && parenCount === 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    // Remueve paréntesis externos redundantes del total de una expresión
+    function removeOuterParentheses(str) {
+        str = str.trim();
+        if (str.startsWith('(') && str.endsWith(')')) {
+            let count = 1;
+            for (let i = 1; i < str.length - 1; i++) {
+                if (str[i] === '(') count++;
+                else if (str[i] === ')') count--;
+                if (count === 0) {
+                    return str; // Paréntesis cerrados antes de tiempo, no envuelven todo
+                }
+            }
+            if (count === 1) {
+                return removeOuterParentheses(str.substring(1, str.length - 1));
+            }
+        }
+        return str;
+    }
+
+    // --- COMPILADOR DINÁMICO DE DATOS PLOTLY HACIA FORMATO WAVEFRONT .OBJ ---
+    function compileTracesToOBJ(traces) {
+        let objContent = "# OBJ Exportado - Conversor Universal\n";
+        let vertexOffset = 1; // El direccionamiento de vértices en OBJ comienza en index 1
+
+        traces.forEach((trace, traceIdx) => {
+            const groupName = `trace_${traceIdx}_${(trace.name || 'unnamed').replace(/\s+/g, '_')}`;
+            objContent += `\ng ${groupName}\n`;
+
+            if (trace.type === 'surface') {
+                // Estructura de Malla de Superficie (Formula Libre)
+                const x = trace.x;
+                const y = trace.y;
+                const z = trace.z;
+
+                const M = y.length; // Filas (Y)
+                const N = x.length; // Columnas (X)
+
+                // 1. Escribir vértices de la malla
+                for (let j = 0; j < M; j++) {
+                    for (let i = 0; i < N; i++) {
+                        objContent += `v ${x[i]} ${y[j]} ${z[j][i]}\n`;
+                    }
+                }
+
+                // 2. Conectar vértices creando caras de malla cuadradas (Quads)
+                for (let j = 0; j < M - 1; j++) {
+                    for (let i = 0; i < N - 1; i++) {
+                        const v1 = vertexOffset + (j * N + i);
+                        const v2 = vertexOffset + (j * N + i + 1);
+                        const v3 = vertexOffset + ((j + 1) * N + i + 1);
+                        const v4 = vertexOffset + ((j + 1) * N + i);
+                        objContent += `f ${v1} ${v2} ${v3} ${v4}\n`;
+                    }
+                }
+                vertexOffset += M * N;
+
+            } else if (trace.type === 'cone') {
+                // Soporte para evitar errores al procesar el tipo 'cone' en OBJ
+                if (!trace.x || !trace.y) return;
+                const len = trace.x.length;
+                for (let i = 0; i < len; i++) {
+                    objContent += `v ${trace.x[i]} ${trace.y[i]} ${trace.z[i]}\n`;
+                }
+                for (let i = 0; i < len; i++) {
+                    objContent += `p ${vertexOffset + i}\n`;
+                }
+                vertexOffset += len;
+            } else {
+                // Estructura de Trayectorias y Líneas (3D Scatter, guías, etc.)
+                if (!trace.x || !trace.y) return;
+                const hasZ = Array.isArray(trace.z);
+                const len = trace.x.length;
+
+                // 1. Escribir vértices de las trayectorias
+                for (let i = 0; i < len; i++) {
+                    const zVal = hasZ ? trace.z[i] : 0;
+                    objContent += `v ${trace.x[i]} ${trace.y[i]} ${zVal}\n`;
+                }
+
+                // 2. Conectar vértices como línea continua o como puntos independientes
+                if (trace.mode && trace.mode.includes('lines')) {
+                    let lineIndices = [];
+                    for (let i = 0; i < len; i++) {
+                        lineIndices.push(vertexOffset + i);
+                    }
+                    objContent += `l ${lineIndices.join(' ')}\n`;
+                } else {
+                    for (let i = 0; i < len; i++) {
+                        objContent += `p ${vertexOffset + i}\n`;
+                    }
+                }
+                vertexOffset += len;
+            }
+        });
+
+        return objContent;
+    }
+
+    // Disparador del archivo de descarga
+    function downloadFile(filename, content) {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const el = document.createElement('a');
+        el.href = URL.createObjectURL(blob);
+        el.download = filename;
+        document.body.appendChild(el);
+        el.click();
+        document.body.removeChild(el);
+    }
 
     // Mapeo de formularios dinámicos
     const formsHTML = {
@@ -100,6 +344,81 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div>
                     <label class="block text-[9px] font-mono text-zinc-500 mb-1">Elevación (φ°)</label>
                     <input type="number" id="in-phi" value="60" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
+                </div>
+            </div>
+        `,
+        'vector-2d': `
+            <div class="space-y-3 animate-fade-in">
+                <span class="block text-[9px] font-mono text-zinc-500 uppercase tracking-wide">Vector A</span>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[8px] font-mono text-zinc-600 mb-0.5">Componente Ax</label>
+                        <input type="number" id="in-ax" value="4" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-mono text-zinc-600 mb-0.5">Componente Ay</label>
+                        <input type="number" id="in-ay" value="3" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <span class="block text-[9px] font-mono text-zinc-500 uppercase tracking-wide">Vector B</span>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[8px] font-mono text-zinc-600 mb-0.5">Componente Bx</label>
+                        <input type="number" id="in-bx" value="-2" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-mono text-zinc-600 mb-0.5">Componente By</label>
+                        <input type="number" id="in-by" value="4" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[9px] font-mono text-zinc-500 mb-1">Operación</label>
+                    <select id="in-vector-op" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-zinc-300 focus:outline-none">
+                        <option value="add" selected>Suma (A + B)</option>
+                        <option value="sub">Resta (A - B)</option>
+                    </select>
+                </div>
+            </div>
+        `,
+        'vector-3d': `
+            <div class="space-y-3 animate-fade-in">
+                <span class="block text-[9px] font-mono text-zinc-500 uppercase tracking-wide">Vector A</span>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <div>
+                        <label class="block text-[8px] font-mono text-zinc-600 mb-0.5">Ax</label>
+                        <input type="number" id="in-ax" value="2" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-mono text-zinc-600 mb-0.5">Ay</label>
+                        <input type="number" id="in-ay" value="4" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-mono text-zinc-600 mb-0.5">Az</label>
+                        <input type="number" id="in-az" value="3" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <span class="block text-[9px] font-mono text-zinc-500 uppercase tracking-wide">Vector B</span>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <div>
+                        <label class="block text-[8px] font-mono text-zinc-600 mb-0.5">Bx</label>
+                        <input type="number" id="in-bx" value="3" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-mono text-zinc-600 mb-0.5">By</label>
+                        <input type="number" id="in-by" value="-1" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-mono text-zinc-600 mb-0.5">Bz</label>
+                        <input type="number" id="in-bz" value="4" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[9px] font-mono text-zinc-500 mb-1">Operación</label>
+                    <select id="in-vector-op" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-zinc-300 focus:outline-none">
+                        <option value="add" selected>Suma (A + B)</option>
+                        <option value="sub">Resta (A - B)</option>
+                        <option value="cross">Producto Cruz (A x B)</option>
+                    </select>
                 </div>
             </div>
         `,
@@ -190,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div>
                         <label class="block text-[9px] font-mono text-zinc-500 mb-1">Vértice k</label>
-                        <input type="number" id="in-k" value="0" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
+                        <input type="number" id="in-h" value="0" step="any" class="w-full bg-zinc-900 border border-white/10 rounded-lg px-2 py-1 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500">
                     </div>
                     <div>
                         <label class="block text-[9px] font-mono text-zinc-500 mb-1">Parámetro p</label>
@@ -237,7 +556,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `
     };
 
-    // --- CONFIGURACIÓN BASE ESTILO DARK SHADCN ---
     const darkThemeLayout = {
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
@@ -307,13 +625,13 @@ document.addEventListener('DOMContentLoaded', () => {
             Plotly.purge(plotCanvas);
         } catch (e) {}
 
-        // CONFIGURACIÓN DE ASPECTO 1:1 EN 2D PARA EVITAR DEFORMACIÓN DE CÍRCULOS
+        // CONFIGURACIÓN DE ASPECTO 1:1 EN 2D PARA EVITAR DEFORMACIÓN DE CÍRCULOS (SIN PROPIEDAD SCENE)
         const layout2D = {
             ...darkThemeLayout,
             xaxis: { ...darkThemeLayout.xaxis, scaleanchor: 'y', scaleratio: 1 },
-            yaxis: { ...darkThemeLayout.yaxis },
-            scene: undefined 
+            yaxis: { ...darkThemeLayout.yaxis }
         };
+        delete layout2D.scene; // Remueve la escena de forma segura para gráficos 2D
 
         if (sys === 'rect-2d') {
             const x = getVal('in-x', 4);
@@ -517,6 +835,132 @@ document.addEventListener('DOMContentLoaded', () => {
 
             Plotly.newPlot(plotCanvas, traces, darkThemeLayout);
 
+        } else if (sys === 'vector-2d') {
+            // --- CÁLCULO Y GRAFICACIÓN DE VECTORES 2D ---
+            const ax = getVal('in-ax', 4);
+            const ay = getVal('in-ay', 3);
+            const bx = getVal('in-bx', -2);
+            const by = getVal('in-by', 4);
+            const op = getSelectVal('in-vector-op', 'add');
+
+            let rx = 0, ry = 0;
+            let opSymbol = '+';
+            if (op === 'add') {
+                rx = ax + bx;
+                ry = ay + by;
+                opSymbol = '+';
+            } else {
+                rx = ax - bx;
+                ry = ay - by;
+                opSymbol = '-';
+            }
+
+            const magA = Math.sqrt(ax * ax + ay * ay);
+            const magB = Math.sqrt(bx * bx + by * by);
+            const magR = Math.sqrt(rx * rx + ry * ry);
+            const dot = ax * bx + ay * by;
+
+            infoText = `$$ \\vec{A} = (${ax.toFixed(2)}, ${ay.toFixed(2)}) \\quad \\vec{B} = (${bx.toFixed(2)}, ${by.toFixed(2)}) $$` +
+                       `$$ \\vec{R} = \\vec{A} ${opSymbol} \\vec{B} = (${rx.toFixed(2)}, ${ry.toFixed(2)}) $$` +
+                       `$$ |\\vec{A}| = ${magA.toFixed(2)} \\quad |\\vec{B}| = ${magB.toFixed(2)} \\quad |\\vec{R}| = ${magR.toFixed(2)} $$` +
+                       `$$ \\vec{A} \\cdot \\vec{B} = ${dot.toFixed(2)} $$`;
+
+            const maxVal = Math.max(Math.abs(ax), Math.abs(ay), Math.abs(bx), Math.abs(by), Math.abs(rx), Math.abs(ry), 5) * 1.35;
+
+            // Vectores Base principales
+            traces.push(get2DArrowTrace(0, 0, ax, ay, '#6366f1', 'Vector A'));
+            traces.push(get2DArrowTrace(0, 0, bx, by, '#10b981', 'Vector B'));
+            traces.push(get2DArrowTrace(0, 0, rx, ry, '#f43f5e', 'Resultante R'));
+
+            // Dibujar las guías punteadas del paralelogramo/polígono
+            if (op === 'add') {
+                traces.push(get2DArrowTrace(ax, ay, rx, ry, '#10b981', 'B Proyectado', true));
+                traces.push(get2DArrowTrace(bx, by, rx, ry, '#6366f1', 'A Proyectado', true));
+            } else {
+                traces.push(get2DArrowTrace(0, 0, -bx, -by, 'rgba(16, 185, 129, 0.35)', '-B Proyectado', true));
+                traces.push(get2DArrowTrace(-bx, -by, rx, ry, '#6366f1', 'A Proyectado', true));
+            }
+
+            layout2D.xaxis.range = [-maxVal, maxVal];
+            layout2D.yaxis.range = [-maxVal, maxVal];
+            layout2D.showlegend = true;
+
+            Plotly.newPlot(plotCanvas, traces, layout2D);
+
+        } else if (sys === 'vector-3d') {
+            // --- CÁLCULO Y GRAFICACIÓN DE VECTORES 3D ---
+            const ax = getVal('in-ax', 2);
+            const ay = getVal('in-ay', 4);
+            const az = getVal('in-az', 3);
+            const bx = getVal('in-bx', 3);
+            const by = getVal('in-by', -1);
+            const bz = getVal('in-bz', 4);
+            const op = getSelectVal('in-vector-op', 'add');
+
+            let rx = 0, ry = 0, rz = 0;
+            let opTitle = '';
+            if (op === 'add') {
+                rx = ax + bx;
+                ry = ay + by;
+                rz = az + bz;
+                opTitle = '\\vec{A} + \\vec{B}';
+            } else if (op === 'sub') {
+                rx = ax - bx;
+                ry = ay - by;
+                rz = az - bz;
+                opTitle = '\\vec{A} - \\vec{B}';
+            } else {
+                // Producto Cruz (Ortogonal)
+                rx = ay * bz - az * by;
+                ry = az * bx - ax * bz;
+                rz = ax * by - ay * bx;
+                opTitle = '\\vec{A} \\times \\vec{B}';
+            }
+
+            const magA = Math.sqrt(ax*ax + ay*ay + az*az);
+            const magB = Math.sqrt(bx*bx + by*by + bz*bz);
+            const magR = Math.sqrt(rx*rx + ry*ry + rz*rz);
+            const dot = ax*bx + ay*by + az*bz;
+
+            infoText = `$$ \\vec{A} = (${ax.toFixed(2)}, ${ay.toFixed(2)}, ${az.toFixed(2)}) \\quad \\vec{B} = (${bx.toFixed(2)}, ${by.toFixed(2)}, ${bz.toFixed(2)}) $$` +
+                       `$$ \\vec{R} = ${opTitle} = (${rx.toFixed(2)}, ${ry.toFixed(2)}, ${rz.toFixed(2)}) $$` +
+                       `$$ |\\vec{A}| = ${magA.toFixed(2)} \\quad |\\vec{B}| = ${magB.toFixed(2)} \\quad |\\vec{R}| = ${magR.toFixed(2)} $$` +
+                       `$$ \\vec{A} \\cdot \\vec{B} = ${dot.toFixed(2)} $$`;
+
+            // Vectores Base y Resultantes
+            traces.push(...get3DArrowTraces(0, 0, 0, ax, ay, az, '#6366f1', 'Vector A'));
+            traces.push(...get3DArrowTraces(0, 0, 0, bx, by, bz, '#10b981', 'Vector B'));
+            traces.push(...get3DArrowTraces(0, 0, 0, rx, ry, rz, '#f43f5e', 'Resultado R'));
+
+            // Guías de proyección del sistema 3D
+            if (op === 'add') {
+                traces.push({
+                    type: 'scatter3d', x: [ax, rx], y: [ay, ry], z: [az, rz],
+                    mode: 'lines', line: { color: '#10b981', width: 2, dash: 'dash' }, name: 'B Proyectado', showlegend: false
+                });
+                traces.push({
+                    type: 'scatter3d', x: [bx, rx], y: [by, ry], z: [bz, rz],
+                    mode: 'lines', line: { color: '#6366f1', width: 2, dash: 'dash' }, name: 'A Proyectado', showlegend: false
+                });
+            } else if (op === 'sub') {
+                traces.push({
+                    type: 'scatter3d', x: [0, -bx], y: [0, -by], z: [0, -bz],
+                    mode: 'lines', line: { color: 'rgba(16, 185, 129, 0.4)', width: 2, dash: 'dash' }, name: '-B', showlegend: false
+                });
+                traces.push({
+                    type: 'scatter3d', x: [-bx, rx], y: [-by, ry], z: [-bz, rz],
+                    mode: 'lines', line: { color: '#6366f1', width: 2, dash: 'dash' }, name: 'A Proyectado', showlegend: false
+                });
+            } else if (op === 'cross') {
+                // Generar el plano formado por los dos vectores base
+                traces.push({
+                    type: 'scatter3d', x: [0, ax, ax + bx, bx, 0], y: [0, ay, ay + by, by, 0], z: [0, az, az + bz, bz, 0],
+                    mode: 'lines', line: { color: 'rgba(244, 63, 94, 0.35)', width: 1.8 }, name: 'Plano base', showlegend: false
+                });
+            }
+
+            Plotly.newPlot(plotCanvas, traces, { ...darkThemeLayout, showlegend: true });
+
         } else if (sys === 'formula-free') {
             const formulaInput = document.getElementById('in-formula');
             const formula = formulaInput ? formulaInput.value.trim() : "sin(x) * cos(y)";
@@ -526,7 +970,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const yMin = getVal('in-ymin', -5);
             const yMax = getVal('in-ymax', 5);
 
-            infoText = `$$ z = ${formula.replace(/\*/g, ' \\cdot ')} $$`;
+            // Genera una representación matemática de LaTeX formal y limpia
+            const latexFormula = parseToLaTeX(formula);
+            infoText = `$$ z = ${latexFormula} $$`;
 
             const xVals = [], yVals = [];
             const stepX = (xMax - xMin) / 30;
@@ -591,14 +1037,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 { x: cx, y: cy, mode: 'lines', line: { color: '#6366f1', width: 3.5 }, name: 'Circunferencia' }
             ];
 
-            const layout2D = {
+            const conicCircleLayout = {
                 ...darkThemeLayout,
                 xaxis: { ...darkThemeLayout.xaxis, range: [-limit, limit], scaleanchor: 'y', scaleratio: 1 },
                 yaxis: { ...darkThemeLayout.yaxis, range: [-limit, limit] },
                 showlegend: true
             };
+            delete conicCircleLayout.scene;
 
-            Plotly.newPlot(plotCanvas, traces, layout2D);
+            Plotly.newPlot(plotCanvas, traces, conicCircleLayout);
 
         } else if (sys === 'conic-ellipse') {
             const h = getVal('in-h', 0);
@@ -623,14 +1070,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 { x: ex, y: ey, mode: 'lines', line: { color: '#6366f1', width: 3.5 }, name: 'Elipse' }
             ];
 
-            const layout2D = {
+            const conicEllipseLayout = {
                 ...darkThemeLayout,
                 xaxis: { ...darkThemeLayout.xaxis, range: [-limit, limit], scaleanchor: 'y', scaleratio: 1 },
                 yaxis: { ...darkThemeLayout.yaxis, range: [-limit, limit] },
                 showlegend: true
             };
+            delete conicEllipseLayout.scene;
 
-            Plotly.newPlot(plotCanvas, traces, layout2D);
+            Plotly.newPlot(plotCanvas, traces, conicEllipseLayout);
 
         } else if (sys === 'conic-parabola') {
             const h = getVal('in-h', 0);
@@ -681,14 +1129,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 { x: px, y: py, mode: 'lines', line: { color: '#6366f1', width: 3.5 }, name: 'Parábola' }
             ];
 
-            const layout2D = {
+            const conicParabolaLayout = {
                 ...darkThemeLayout,
                 xaxis: { ...darkThemeLayout.xaxis, range: [-limit, limit], scaleanchor: 'y', scaleratio: 1 },
                 yaxis: { ...darkThemeLayout.yaxis, range: [-limit, limit] },
                 showlegend: true
             };
+            delete conicParabolaLayout.scene;
 
-            Plotly.newPlot(plotCanvas, traces, layout2D);
+            Plotly.newPlot(plotCanvas, traces, conicParabolaLayout);
 
         } else if (sys === 'conic-hyperbola') {
             const h = getVal('in-h', 0);
@@ -755,20 +1204,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 { x: hx2, y: hy2, mode: 'lines', line: { color: '#6366f1', width: 3.5 }, name: 'Hipérbola (Rama 2)' }
             ];
 
-            const layout2D = {
+            const conicHyperbolaLayout = {
                 ...darkThemeLayout,
                 xaxis: { ...darkThemeLayout.xaxis, range: [-limit, limit], scaleanchor: 'y', scaleratio: 1 },
                 yaxis: { ...darkThemeLayout.yaxis, range: [-limit, limit] },
                 showlegend: true
             };
+            delete conicHyperbolaLayout.scene;
 
-            Plotly.newPlot(plotCanvas, traces, layout2D);
+            Plotly.newPlot(plotCanvas, traces, conicHyperbolaLayout);
         }
+
+        // Almacenar el estado actual para la exportación OBJ posterior
+        current3DTraces = traces;
+        currentSystem = sys;
 
         renderMath(outputRep, infoText);
     }
 
-    // Inyección de formularios
     function updateForm() {
         const sys = selectSystem.value;
         inputsContainer.innerHTML = formsHTML[sys] || '';
@@ -796,8 +1249,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updatePlot();
     }
 
-    // --- ESCUCHADOR GLOBAL DE CARGA DE MATHJAX ---
-    // En cuanto MathJax termina de cargar asíncronamente de internet, fuerza un repintado de la fórmula
     window.addEventListener('MathJaxReady', () => {
         updatePlot();
     });
@@ -805,7 +1256,6 @@ document.addEventListener('DOMContentLoaded', () => {
     selectSystem.addEventListener('change', updateForm);
     updateForm();
 
-   
     document.querySelectorAll('.btn-symbol').forEach(btn => {
         btn.addEventListener('click', () => {
             const focusedInput = document.activeElement;
@@ -820,6 +1270,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-});
 
- 
+    // control modelos 3d
+    if (btnExportObj) {
+        btnExportObj.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!current3DTraces || current3DTraces.length === 0) {
+                alert("No hay datos de gráfica disponibles para exportar.");
+                return;
+            }
+            const objContent = compileTracesToOBJ(current3DTraces);
+            downloadFile(`${currentSystem}-modelo.obj`, objContent);
+        });
+    }
+});

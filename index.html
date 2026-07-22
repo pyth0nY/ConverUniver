@@ -16,12 +16,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <!-- VIDEO DE FONDO PERMANENTE Y CAPA DE CONTRASTE -->
-    <video autoplay loop muted playsinline class="video-background">
-        <!-- Buscará primero tu archivo de video local en tu proyecto -->
-        <source src="video.mp4" type="video/mp4">
+<video autoplay loop muted playsinline class="video-background">
+    <!-- Buscará primero tu archivo de video local en tu proyecto -->
+    <source src="video.mp4" type="video/mp4">
 
-    </video>
-    <div class="video-overlay"></div>
+</video>
+<div class="video-overlay"></div>
+
 <body class="antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500/30 selection:text-white">
 
     <!-- PRE-LOADER ANIMADO -->
@@ -38,11 +39,11 @@
         </div>
         <span class="loader-text">Conversor Universal</span>
         <!-- VIDEO DE FONDO 4K Y CAPA DE CONTRASTE -->
-    <video autoplay loop muted playsinline class="video-background">
-        <!-- Primero intentará cargar tu archivo local si lo colocas en tu carpeta -->
-        <source src="video.mp4" type="video/mp4">
-    </video>
-    <div class="video-overlay"></div>
+        <video autoplay loop muted playsinline class="video-background">
+            <!-- Primero intentará cargar tu archivo local si lo colocas en tu carpeta -->
+            <source src="video.mp4" type="video/mp4">
+        </video>
+        <div class="video-overlay"></div>
     </div>
 
     <!-- El resto de tu código HTML habitual (Blobs, Header, Main, etc.) -->
@@ -59,21 +60,31 @@
                 <h1 class="text-sm font-semibold tracking-tight text-zinc-100">Conversor Universal</h1>
             </div>
         </div>
-   
-        <nav class="flex flex-wrap items-center justify-center gap-1.5 bg-zinc-950/80 p-1 rounded-xl border border-white/5 shadow-inner">
-            <a href="index.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+
+        <nav
+            class="flex flex-wrap items-center justify-center gap-1.5 bg-zinc-950/80 p-1 rounded-xl border border-white/5 shadow-inner">
+            <a href="index.html"
+                class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
                 Conversor
             </a>
-            <a href="galea.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+            <a href="galea.html"
+                class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
                 Método de Galera
             </a>
-            <a href="formulas.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+            <a href="formulas.html"
+                class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
                 Fórmulas
             </a>
-            <a href="geograficos.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+            <a href="geograficos.html"
+                class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
                 Geográficos
             </a>
-            <a href="develops.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+            <a href="geometria.html"
+                class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+                Geometría
+            </a>
+            <a href="develops.html"
+                class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
                 Develops
             </a>
         </nav>
@@ -192,12 +203,12 @@
                 // Forzar una espera de 10 segundos (10000 ms) antes de iniciar la salida
                 setTimeout(() => {
                     preloader.classList.add('preloader-hidden');
-                    
+
                     // Remueve el elemento del DOM tras terminar la animación de desvanecimiento CSS (750ms)
                     setTimeout(() => {
                         preloader.remove();
                     }, 750);
-                }, 5000); 
+                }, 5000);
             }
         });
     </script>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor Universal // Geometría Analítica</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="logo.png">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Plotly para gráficos interactivos -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- MathJax para visualización LaTeX -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500/30 selection:text-white">
+
+    <!-- PRE-LOADER -->
+    <div id="preloader" class="preloader-container">
+        <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+            <div class="absolute top-[35%] left-[35%] w-[300px] h-[300px] rounded-full bg-indigo-500/5 blur-[100px] animate-pulse"></div>
+        </div>
+        <div class="loader-ring">
+            <img src="logo.png" alt="Cargando..." class="loader-logo">
+        </div>
+        <span class="loader-text">Conversor Universal</span>
+    </div>
+
+    <!-- VIDEO DE FONDO -->
+    <video autoplay loop muted playsinline class="video-background">
+        <source src="video.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+
+    <!-- Header Sincronizado -->
+    <header class="w-full max-w-5xl mx-auto px-6 py-6 flex flex-col md:flex-row gap-4 justify-between items-center border-b border-white/5 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <img src="logo.png" alt="Conversor Universal" class="h-10 w-auto object-contain spring-transition hover:opacity-80">
+            <div>
+                <span class="font-mono text-[9px] uppercase tracking-widest text-zinc-500">Módulo de Resolución</span>
+                <h1 class="text-sm font-semibold tracking-tight text-zinc-100">Geometría Analítica</h1>
+            </div>
+        </div>
+        <nav class="flex flex-wrap items-center justify-center gap-1.5 bg-zinc-950/80 p-1 rounded-xl border border-white/5 shadow-inner">
+            <a href="index.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+                Conversor
+            </a>
+            <a href="galea.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+                Método de Galera
+            </a>
+            <a href="formulas.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+                Fórmulas
+            </a>
+            <a href="geograficos.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+                Geográficos
+            </a>
+            <a href="geometria.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all bg-white/5 text-zinc-100 border border-white/5">
+                Geometría
+            </a>
+            <a href="develops.html" class="text-xs font-medium px-3.5 py-2 rounded-lg transition-all text-zinc-400 hover:text-zinc-100">
+                Develops
+            </a>
+        </nav>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="flex-grow w-full max-w-6xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- PANEL DE CONTROL (IZQUIERDA) -->
+            <div class="glass-card rounded-2xl p-5 md:p-6 shadow-2xl space-y-5 animate-fade-in lg:col-span-1 flex flex-col justify-between">
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 border-b border-white/5 pb-3">
+                        <i data-lucide="calculator" class="text-indigo-400 w-4 h-4"></i>
+                        <h2 class="text-xs font-semibold font-mono uppercase tracking-wider text-zinc-200">Menú del Ejercicio</h2>
+                    </div>
+
+                    <!-- Selector de Tópico Geométrico -->
+                    <div class="space-y-1.5">
+                        <label class="block text-[10px] font-mono text-zinc-500 uppercase">Tópico Analítico</label>
+                        <select id="geo-topic" class="w-full bg-zinc-900 border border-white/10 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-indigo-500 text-zinc-100 font-sans">
+                            <optgroup label="Puntos y Rectas">
+                                <option value="dist-mid" selected>Distancia, Pendiente y Punto Medio</option>
+                                <option value="segment-ratio">División de Segmento en Razón dada</option>
+                            </optgroup>
+                            <optgroup label="Secciones Cónicas">
+                                <option value="ellipse">Elipse Solver & Recta Tangente</option>
+                                <option value="hyperbola">Hipérbola Solver & Asíntotas</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <!-- Contenedor de Inputs Dinámicos -->
+                    <div id="geo-inputs-container" class="space-y-3 pt-2">
+                        <!-- Inyectado por Javascript -->
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-white/5 text-center text-[9px] text-zinc-500 leading-normal">
+                    Ingresa los parámetros. El desglose detallado y la gráfica interactiva se recalcularán automáticamente.
+                </div>
+            </div>
+
+            <!-- LIENZO Y DESGLOSE DETALLADO (DERECHA) -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Gráfica Interactiva -->
+                <div class="glass-card rounded-2xl p-5 shadow-2xl">
+                    <div class="flex items-center gap-2 border-b border-white/5 pb-3 mb-4">
+                        <i data-lucide="eye" class="text-violet-400 w-4 h-4"></i>
+                        <h2 class="text-xs font-semibold font-mono uppercase tracking-wider text-zinc-200">Esquema Gráfico en Tiempo Real</h2>
+                    </div>
+                    <div class="relative bg-zinc-950/40 border border-white/5 rounded-xl overflow-hidden min-h-[350px]">
+                        <div id="geo-plot-canvas" class="w-full h-[360px]"></div>
+                    </div>
+                </div>
+
+                <!-- Desglose Matemático LaTeX -->
+                <div class="glass-card rounded-2xl p-5 shadow-2xl overflow-hidden">
+                    <div class="flex items-center gap-2 border-b border-white/5 pb-3 mb-4">
+                        <i data-lucide="file-text" class="text-indigo-400 w-4 h-4"></i>
+                        <h2 class="text-xs font-semibold font-mono uppercase tracking-wider text-zinc-200">Resolución Paso a Paso (Fórmulas y Procesos)</h2>
+                    </div>
+                    <div class="p-4 bg-zinc-950/60 border border-white/5 rounded-xl min-h-[200px] overflow-x-auto">
+                        <div id="geo-step-by-step" class="text-zinc-200 text-xs leading-relaxed font-sans">
+                            $$ Esperando entrada de datos... $$
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-6 border-t border-white/5 text-[10px] text-zinc-600 font-mono">
+       &copy; 2026 Conversor Universal. Todos los derechos reservados.
+    </footer>
+
+    <script>
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                setTimeout(() => {
+                    preloader.classList.add('preloader-hidden');
+                    setTimeout(() => {
+                        preloader.remove();
+                    }, 750);
+                }, 0); 
+            }
+        });
+    </script>
+    <script src="geometria.js" type="module"></script>
+</body>
+</html>

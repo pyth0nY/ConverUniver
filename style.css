@@ -309,17 +309,14 @@ body {
    SISTEMA DE VIDEO DE FONDO 4K
    ========================================================================== */
 
-/* El video se posiciona detrás de todo el contenido */
-/* Reproductor de video de fondo fijo */
 .video-background {
     position: fixed;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: -2; /* Detrás del overlay y del contenido */
+    z-index: -2; 
     pointer-events: none;
-    /* Atenuamos el brillo para que los textos de la web sigan resaltando */
     filter: brightness(0.4) contrast(1.05); 
 }
 
@@ -327,8 +324,138 @@ body {
 .video-overlay {
     position: fixed;
     inset: 0;
-    /* Gradiente radial que oscurece los bordes para dar un aspecto cinemático */
+
     background: radial-gradient(circle at center, rgba(3, 3, 3, 0.4) 0%, rgba(3, 3, 3, 0.85) 100%);
-    z-index: -1; /* Delante del video, pero detrás de las tarjetas y textos */
+    z-index: -1;
     pointer-events: none;
+}
+
+/* ==========================================================================
+   EFECTO GLITCH 
+   ========================================================================== */
+
+/* Flotación constante con leve deriva lateral */
+@keyframes soft-float-heavy {
+    0%, 100% {
+        transform: translateY(0) translateX(0);
+    }
+    25% {
+        transform: translateY(-5px) translateX(-1px);
+    }
+    50% {
+        transform: translateY(-10px) translateX(1px);
+    }
+    75% {
+        transform: translateY(-5px) translateX(-0.5px);
+    }
+}
+
+/* 2. Micro-vibraciones físicas de interferencia constante en la tarjeta */
+@keyframes card-vibrate {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-1.5px, -1px); }
+    20% { transform: translate(1.5px, 1px); }
+    30% { transform: translate(-1px, 1.5px); }
+    40% { transform: translate(1px, -1px); }
+    50% { transform: translate(-1px, 0.5px); }
+    60% { transform: translate(1.5px, -1px); }
+    70% { transform: translate(-0.5px, -1.5px); }
+    80% { transform: translate(1.5px, 1px); }
+    90% { transform: translate(-1.5px, -1px); }
+}
+
+/* 3. Aberración Cromática Constante sobre el Texto Principal (Nombre) */
+@keyframes text-chromatic-glitch {
+    0%, 100% {
+        text-shadow: 2.5px -1.5px 0 #06b6d4, -2.5px 1.5px 0 #ec4899;
+    }
+    15% {
+        text-shadow: -2.5px 2px 0 #06b6d4, 2.5px -2px 0 #ec4899;
+    }
+    30% {
+        text-shadow: 2px 2.5px 0 #06b6d4, -2px -2.5px 0 #ec4899;
+    }
+    45% {
+        text-shadow: -1.5px -2.5px 0 #06b6d4, 1.5px 2.5px 0 #ec4899;
+    }
+    60% {
+        text-shadow: 3px 1.5px 0 #06b6d4, -3px -1.5px 0 #ec4899;
+    }
+    75% {
+        text-shadow: -3px -1.5px 0 #06b6d4, 3px 1.5px 0 #ec4899;
+    }
+    90% {
+        text-shadow: 1.5px 3px 0 #06b6d4, -1.5px -3px 0 #ec4899;
+    }
+}
+
+/* 4. Cortes laterales agresivos (Cian) */
+@keyframes glitch-slice-cyan-heavy {
+    0% { clip-path: inset(10% 0 70% 0); }
+    12% { clip-path: inset(45% 0 10% 0); }
+    25% { clip-path: inset(2% 0 85% 0); }
+    37% { clip-path: inset(75% 0 5% 0); }
+    50% { clip-path: inset(15% 0 65% 0); }
+    62% { clip-path: inset(60% 0 25% 0); }
+    75% { clip-path: inset(25% 0 50% 0); }
+    87% { clip-path: inset(85% 0 1% 0); }
+    100% { clip-path: inset(10% 0 70% 0); }
+}
+
+/* 5. Cortes laterales agresivos (Rosa) */
+@keyframes glitch-slice-pink-heavy {
+    0% { clip-path: inset(70% 0 10% 0); }
+    12% { clip-path: inset(10% 0 75% 0); }
+    25% { clip-path: inset(85% 0 2% 0); }
+    37% { clip-path: inset(15% 0 65% 0); }
+    50% { clip-path: inset(60% 0 25% 0); }
+    62% { clip-path: inset(2% 0 85% 0); }
+    75% { clip-path: inset(50% 0 35% 0); }
+    87% { clip-path: inset(5% 0 90% 0); }
+    100% { clip-path: inset(70% 0 10% 0); }
+}
+
+/* Tarjeta Glitch Principal */
+.glitch-card {
+    position: relative;
+    animation: soft-float-heavy 4s ease-in-out infinite, card-vibrate 0.4s linear infinite; /* Flotación + vibración constante */
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 
+        -8px 0 25px rgba(6, 182, 212, 0.22),  
+         8px 0 25px rgba(236, 72, 153, 0.22); 
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.glitch-card::before,
+.glitch-card::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0.95;
+    z-index: -1;
+}
+
+
+.glitch-card::before {
+    border-left: 6px solid #06b6d4;
+    border-right: 6px solid #06b6d4;
+    animation: glitch-slice-cyan-heavy 0.25s steps(3, start) infinite; 
+    transform: translateX(-10px); 
+}
+
+
+.glitch-card::after {
+    border-left: 6px solid #ec4899;
+    border-right: 6px solid #ec4899;
+    animation: glitch-slice-pink-heavy 0.25s steps(3, start) infinite; 
+    transform: translateX(10px); 
+}
+
+
+.glitch-text {
+    animation: text-chromatic-glitch 0.8s linear infinite;
+    color: #ffffff;
 }
